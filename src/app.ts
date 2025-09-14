@@ -96,8 +96,12 @@ export class KrishiMitraApp {
         <div class="header-content">
           <div class="logo-section">
             <i class="fas fa-seedling logo-icon"></i>
-            <h1 class="app-title">KrishiMitra</h1>
-            <span class="app-subtitle">Smart Agricultural Advisory</span>
+            <h1 class="app-title">
+              KrishiMitra | कृषिमित्र
+            </h1>
+            <span class="app-subtitle">
+              Smart Agricultural Advisory | स्मार्ट कृषि सलाह
+            </span>
           </div>
           <div class="header-actions">
             <div class="language-selector">
