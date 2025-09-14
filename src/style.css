@@ -1,0 +1,1300 @@
+/* KrishiMitra - Smart Agricultural Advisory System */
+:root {
+  /* Color Palette */
+  --primary-green: #2d5a27;
+  --secondary-green: #4a7c59;
+  --accent-green: #6b8e23;
+  --light-green: #90ee90;
+  --background: #f8f9fa;
+  --surface: #ffffff;
+  --text-primary: #2c3e50;
+  --text-secondary: #6c757d;
+  --border: #e9ecef;
+  --shadow: rgba(0, 0, 0, 0.1);
+  --success: #28a745;
+  --warning: #ffc107;
+  --danger: #dc3545;
+  --info: #17a2b8;
+
+  /* Typography */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--text-primary);
+  background-color: var(--background);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* App Container */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.app-header {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+  color: white;
+  padding: 1rem 0;
+  box-shadow: 0 2px 10px var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo-icon {
+  font-size: 2rem;
+  color: var(--light-green);
+}
+
+.app-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.app-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-left: 0.5rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.language-dropdown {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 6px;
+  background: white;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.voice-btn, .user-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.voice-btn:hover, .user-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Navigation */
+.app-navigation {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 0;
+  position: sticky;
+  top: 80px;
+  z-index: 999;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  overflow-x: auto;
+  padding: 0 2rem;
+}
+
+.nav-item {
+  background: none;
+  border: none;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 120px;
+  color: var(--text-secondary);
+  border-bottom: 3px solid transparent;
+}
+
+.nav-item:hover {
+  color: var(--primary-green);
+  background: rgba(45, 90, 39, 0.05);
+}
+
+.nav-item.active {
+  color: var(--primary-green);
+  border-bottom-color: var(--primary-green);
+  background: rgba(45, 90, 39, 0.05);
+}
+
+.nav-item i {
+  font-size: 1.2rem;
+}
+
+.nav-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Dashboard */
+.dashboard-container {
+  max-width: 100%;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h2 {
+  font-size: 2rem;
+  color: var(--primary-green);
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-header p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px var(--shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px var(--shadow);
+}
+
+.dashboard-card h3 {
+  color: var(--primary-green);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.weather-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.weather-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.temperature {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-green);
+}
+
+.humidity {
+  color: var(--text-secondary);
+}
+
+.weather-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.alert-item {
+  background: rgba(255, 193, 7, 0.1);
+  border-left: 4px solid var(--warning);
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.crops-list, .market-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.crop-item, .market-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: rgba(45, 90, 39, 0.05);
+  border-radius: 6px;
+}
+
+.crop-name {
+  font-weight: 500;
+}
+
+.crop-score {
+  background: var(--success);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+.price {
+  font-weight: 600;
+  color: var(--primary-green);
+}
+
+.trend {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.trend.up {
+  color: var(--success);
+}
+
+.trend.down {
+  color: var(--danger);
+}
+
+.trend.stable {
+  color: var(--text-secondary);
+}
+
+/* Crop Advisory */
+.crop-advisory-container {
+  max-width: 100%;
+}
+
+.crop-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  font-size: 1rem;
+}
+
+.refresh-btn {
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.3s ease;
+}
+
+.refresh-btn:hover {
+  background: var(--secondary-green);
+}
+
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.recommendation-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px var(--shadow);
+  border: 1px solid var(--border);
+  transition: transform 0.3s ease;
+}
+
+.recommendation-card:hover {
+  transform: translateY(-2px);
+}
+
+.crop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.crop-header h3 {
+  color: var(--primary-green);
+  font-size: 1.3rem;
+}
+
+.score-badge {
+  background: var(--success);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.crop-details {
+  margin-bottom: 1rem;
+}
+
+.crop-details p {
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.reasons {
+  margin-bottom: 1rem;
+}
+
+.reasons h4 {
+  color: var(--primary-green);
+  margin-bottom: 0.5rem;
+}
+
+.reasons ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.reasons li {
+  padding: 0.25rem 0;
+  color: var(--text-secondary);
+}
+
+.reasons li:before {
+  content: "✓ ";
+  color: var(--success);
+  font-weight: bold;
+}
+
+.timeline {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.timeline p {
+  margin-bottom: 0.25rem;
+  color: var(--text-secondary);
+}
+
+/* Weather */
+.weather-container {
+  max-width: 100%;
+}
+
+.current-weather {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.weather-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.weather-metric {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(45, 90, 39, 0.05);
+  border-radius: 8px;
+}
+
+.weather-metric i {
+  color: var(--primary-green);
+  font-size: 1.2rem;
+}
+
+.forecast-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.forecast-card {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(45, 90, 39, 0.05);
+  border-radius: 8px;
+}
+
+.forecast-date {
+  font-weight: 600;
+  color: var(--primary-green);
+  margin-bottom: 0.5rem;
+}
+
+.forecast-temp {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.max-temp {
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.min-temp {
+  color: var(--text-secondary);
+}
+
+.forecast-condition {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.forecast-condition i {
+  color: var(--primary-green);
+  font-size: 1.5rem;
+}
+
+.forecast-details {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.irrigation-recommendations {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.recommendations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.recommendation-item {
+  background: rgba(23, 162, 184, 0.1);
+  border-left: 4px solid var(--info);
+  padding: 0.75rem;
+  border-radius: 4px;
+}
+
+/* Soil Health */
+.soil-health-container {
+  max-width: 100%;
+}
+
+.soil-overview {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.soil-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.soil-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(45, 90, 39, 0.05);
+  border-radius: 8px;
+}
+
+.metric-label {
+  color: var(--text-secondary);
+}
+
+.metric-value {
+  font-weight: 600;
+  color: var(--primary-green);
+}
+
+.metric-value.good {
+  color: var(--success);
+}
+
+.metric-value.poor {
+  color: var(--danger);
+}
+
+.nutrient-analysis {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.nutrients-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.nutrient-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nutrient-name {
+  min-width: 120px;
+  font-weight: 500;
+  color: var(--primary-green);
+}
+
+.nutrient-bar {
+  flex: 1;
+  height: 20px;
+  background: rgba(45, 90, 39, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.nutrient-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-green), var(--secondary-green));
+  transition: width 0.3s ease;
+}
+
+.nutrient-value {
+  min-width: 80px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.soil-recommendations {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.soil-recommendations .recommendations-list {
+  margin-top: 1rem;
+}
+
+.soil-recommendations .recommendation-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(40, 167, 69, 0.1);
+  border-left: 4px solid var(--success);
+}
+
+.soil-recommendations .recommendation-item i {
+  color: var(--success);
+}
+
+/* Market Prices */
+.market-prices-container {
+  max-width: 100%;
+}
+
+.prices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.price-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px var(--shadow);
+  transition: transform 0.3s ease;
+}
+
+.price-card:hover {
+  transform: translateY(-2px);
+}
+
+.price-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.price-header h3 {
+  color: var(--primary-green);
+}
+
+.trend-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.trend-indicator.up {
+  background: rgba(40, 167, 69, 0.1);
+  color: var(--success);
+}
+
+.trend-indicator.down {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--danger);
+}
+
+.trend-indicator.stable {
+  background: rgba(108, 117, 125, 0.1);
+  color: var(--text-secondary);
+}
+
+.price-main {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.price-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-green);
+}
+
+.price-unit {
+  color: var(--text-secondary);
+}
+
+.price-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.market-insights {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.insight-card {
+  padding: 1rem;
+  background: rgba(45, 90, 39, 0.05);
+  border-radius: 8px;
+}
+
+.insight-card h4 {
+  color: var(--primary-green);
+  margin-bottom: 0.5rem;
+}
+
+.insight-card p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Farm Calendar */
+.farm-calendar-container {
+  max-width: 100%;
+}
+
+.calendar-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.calendar-btn {
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.calendar-btn:hover {
+  background: var(--secondary-green);
+}
+
+.calendar-grid {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.day-header {
+  text-align: center;
+  font-weight: 600;
+  color: var(--primary-green);
+  padding: 0.5rem;
+}
+
+.calendar-body {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+}
+
+.upcoming-tasks {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(45, 90, 39, 0.05);
+  border-radius: 8px;
+}
+
+.task-date {
+  background: var(--primary-green);
+  color: white;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: center;
+}
+
+.task-content {
+  flex: 1;
+}
+
+.task-content h4 {
+  color: var(--primary-green);
+  margin-bottom: 0.25rem;
+}
+
+.task-content p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.task-priority {
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.task-priority.high {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--danger);
+}
+
+.task-priority.medium {
+  background: rgba(255, 193, 7, 0.1);
+  color: var(--warning);
+}
+
+.task-priority.low {
+  background: rgba(40, 167, 69, 0.1);
+  color: var(--success);
+}
+
+/* Diseases & Pests */
+.diseases-pests-container {
+  max-width: 100%;
+}
+
+.detection-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.upload-area {
+  margin-top: 1rem;
+}
+
+.upload-box {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 3rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upload-box:hover {
+  border-color: var(--primary-green);
+  background: rgba(45, 90, 39, 0.05);
+}
+
+.upload-box i {
+  font-size: 3rem;
+  color: var(--primary-green);
+  margin-bottom: 1rem;
+}
+
+.upload-box p {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.upload-btn {
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.upload-btn:hover {
+  background: var(--secondary-green);
+}
+
+.diseases-section, .pests-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.diseases-grid, .pests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.disease-card, .pest-card {
+  padding: 1rem;
+  background: rgba(45, 90, 39, 0.05);
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-green);
+}
+
+.disease-card h4, .pest-card h4 {
+  color: var(--primary-green);
+  margin-bottom: 0.5rem;
+}
+
+.disease-card p, .pest-card p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Financial Aid */
+.financial-aid-container {
+  max-width: 100%;
+}
+
+.schemes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.scheme-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px var(--shadow);
+  transition: transform 0.3s ease;
+}
+
+.scheme-card:hover {
+  transform: translateY(-2px);
+}
+
+.scheme-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.scheme-header h3 {
+  color: var(--primary-green);
+}
+
+.scheme-type {
+  background: rgba(45, 90, 39, 0.1);
+  color: var(--primary-green);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.scheme-description {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.scheme-details h4 {
+  color: var(--primary-green);
+  margin: 1rem 0 0.5rem 0;
+}
+
+.scheme-details ul, .scheme-details ol {
+  margin-left: 1rem;
+  color: var(--text-secondary);
+}
+
+.scheme-details li {
+  margin-bottom: 0.25rem;
+}
+
+.contact-info {
+  background: rgba(23, 162, 184, 0.1);
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin: 1rem 0;
+  color: var(--text-secondary);
+}
+
+.apply-btn {
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.apply-btn:hover {
+  background: var(--secondary-green);
+}
+
+.financial-tools {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.tool-card {
+  padding: 1rem;
+  background: rgba(45, 90, 39, 0.05);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.tool-card h4 {
+  color: var(--primary-green);
+  margin-bottom: 0.5rem;
+}
+
+.tool-card p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.tool-btn {
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.tool-btn:hover {
+  background: var(--secondary-green);
+}
+
+/* Footer */
+.app-footer {
+  background: var(--primary-green);
+  color: white;
+  padding: 2rem 0 1rem;
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.footer-section h4 {
+  margin-bottom: 1rem;
+  color: var(--light-green);
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-section a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-section a:hover {
+  color: var(--light-green);
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 2rem;
+  padding-top: 1rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .nav-container {
+    padding: 0 1rem;
+  }
+
+  .nav-item {
+    min-width: 80px;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .nav-label {
+    font-size: 0.7rem;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recommendations-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .weather-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .forecast-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .soil-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .prices-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .schemes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tools-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-title {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .forecast-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-header,
+  .calendar-body {
+    font-size: 0.8rem;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .app-header,
+  .app-navigation,
+  .app-footer {
+    display: none;
+  }
+
+  .main-content {
+    padding: 0;
+  }
+
+  .dashboard-card,
+  .recommendation-card,
+  .price-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
