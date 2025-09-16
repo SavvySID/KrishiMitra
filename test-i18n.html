@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KrishiMitra - Punjabi Language Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 2.5em;
+            color: #2c5530;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        .language-selector {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .language-selector select {
+            padding: 10px 20px;
+            border: 2px solid #4CAF50;
+            border-radius: 25px;
+            background: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+        .demo-section h3 {
+            color: #2c5530;
+            margin-top: 0;
+        }
+        .translation-demo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .translation-item {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        .translation-item strong {
+            color: #2c5530;
+        }
+        .punjabi-text {
+            font-family: 'Gurmukhi', 'Noto Sans Gurmukhi', sans-serif;
+            font-size: 1.1em;
+            color: #333;
+        }
+        .english-text {
+            color: #666;
+            font-style: italic;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .feature-card {
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .feature-card i {
+            font-size: 2em;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        .feature-card h4 {
+            color: #2c5530;
+            margin: 10px 0;
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo" id="appTitle">🌱 ਕ੍ਰਿਸ਼ੀ ਮਿੱਤਰ</div>
+            <div class="subtitle" id="appSubtitle">ਸਮਾਰਟ ਖੇਤੀਬਾੜੀ ਸਲਾਹਕਾਰ</div>
+        </div>
+
+        <div class="language-selector">
+            <select id="languageSelect">
+                <option value="en">English</option>
+                <option value="pa" selected>ਪੰਜਾਬੀ (Punjabi)</option>
+            </select>
+        </div>
+
+        <div class="demo-section">
+            <h3 id="welcomeTitle">ਕ੍ਰਿਸ਼ੀ ਮਿੱਤਰ ਵਿੱਚ ਸਵਾਗਤ ਹੈ</h3>
+            <p id="welcomeSubtitle">ਬਿਹਤਰ ਖੇਤੀਬਾੜੀ ਫੈਸਲਿਆਂ ਲਈ ਤੁਹਾਡਾ ਸਮਾਰਟ ਖੇਤੀਬਾੜੀ ਸਾਥੀ</p>
+        </div>
+
+        <div class="demo-section">
+            <h3>ਨੈਵੀਗੇਸ਼ਨ ਮੇਨੂ</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i class="fas fa-home"></i>
+                    <h4 id="navDashboard">ਡੈਸ਼ਬੋਰਡ</h4>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-seedling"></i>
+                    <h4 id="navCrops">ਫਸਲ ਸਲਾਹ</h4>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-cloud-sun"></i>
+                    <h4 id="navWeather">ਮੌਸਮ</h4>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-mountain"></i>
+                    <h4 id="navSoil">ਮਿੱਟੀ ਦਾ ਸਿਹਤ</h4>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h4 id="navMarket">ਬਾਜ਼ਾਰ ਮੁੱਲ</h4>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h4 id="navCalendar">ਖੇਤ ਕੈਲੰਡਰ</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>ਲੌਗਇਨ ਫਾਰਮ</h3>
+            <div class="translation-demo">
+                <div class="translation-item">
+                    <strong>Email Address:</strong><br>
+                    <span class="punjabi-text" id="emailLabel">ਈਮੇਲ ਪਤਾ</span>
+                </div>
+                <div class="translation-item">
+                    <strong>Password:</strong><br>
+                    <span class="punjabi-text" id="passwordLabel">ਪਾਸਵਰਡ</span>
+                </div>
+                <div class="translation-item">
+                    <strong>Login Button:</strong><br>
+                    <span class="punjabi-text" id="loginBtn">ਲੌਗਇਨ</span>
+                </div>
+                <div class="translation-item">
+                    <strong>Register Link:</strong><br>
+                    <span class="punjabi-text" id="registerLink">ਕੀ ਤੁਹਾਡਾ ਖਾਤਾ ਨਹੀਂ ਹੈ? ਇੱਥੇ ਰਜਿਸਟਰ ਕਰੋ</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>ਡੈਸ਼ਬੋਰਡ ਸਮੱਗਰੀ</h3>
+            <div class="translation-demo">
+                <div class="translation-item">
+                    <strong>Current Weather:</strong><br>
+                    <span class="punjabi-text" id="currentWeather">ਮੌਜੂਦਾ ਮੌਸਮ</span>
+                </div>
+                <div class="translation-item">
+                    <strong>Weather Alerts:</strong><br>
+                    <span class="punjabi-text" id="weatherAlerts">ਮੌਸਮ ਚੇਤਾਵਨੀਆਂ</span>
+                </div>
+                <div class="translation-item">
+                    <strong>Recommended Crops:</strong><br>
+                    <span class="punjabi-text" id="recommendedCrops">ਸਿਫਾਰਸ਼ੀ ਫਸਲਾਂ</span>
+                </div>
+                <div class="translation-item">
+                    <strong>Market Prices:</strong><br>
+                    <span class="punjabi-text" id="marketPrices">ਬਾਜ਼ਾਰ ਮੁੱਲ</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ</h3>
+            <div class="translation-demo">
+                <div class="translation-item">
+                    <strong>Voice Input:</strong><br>
+                    <span class="punjabi-text" id="voiceFeature">ਆਵਾਜ਼ ਇਨਪੁਟ</span>
+                </div>
+                <div class="translation-item">
+                    <strong>Image Detection:</strong><br>
+                    <span class="punjabi-text" id="imageDetection">ਚਿੱਤਰ-ਆਧਾਰਿਤ ਖੋਜ</span>
+                </div>
+                <div class="translation-item">
+                    <strong>Financial Aid:</strong><br>
+                    <span class="punjabi-text" id="financialAid">ਵਿੱਤੀ ਸਹਾਇਤਾ</span>
+                </div>
+                <div class="translation-item">
+                    <strong>Soil Health:</strong><br>
+                    <span class="punjabi-text" id="soilHealth">ਮਿੱਟੀ ਦਾ ਸਿਹਤ ਪ੍ਰਬੰਧਨ</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn" onclick="switchLanguage()">
+                <i class="fas fa-language"></i> ਭਾਸ਼ਾ ਬਦਲੋ / Switch Language
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Simple translation object for demo
+        const translations = {
+            en: {
+                appTitle: '🌱 KrishiMitra',
+                appSubtitle: 'Smart Agricultural Advisory',
+                welcomeTitle: 'Welcome to KrishiMitra',
+                welcomeSubtitle: 'Your smart agricultural companion for better farming decisions',
+                navDashboard: 'Dashboard',
+                navCrops: 'Crop Advisory',
+                navWeather: 'Weather',
+                navSoil: 'Soil Health',
+                navMarket: 'Market Prices',
+                navCalendar: 'Farm Calendar',
+                emailLabel: 'Email Address',
+                passwordLabel: 'Password',
+                loginBtn: 'Login',
+                registerLink: "Don't have an account? Register here",
+                currentWeather: 'Current Weather',
+                weatherAlerts: 'Weather Alerts',
+                recommendedCrops: 'Recommended Crops',
+                marketPrices: 'Market Prices',
+                voiceFeature: 'Voice Input',
+                imageDetection: 'Image-Based Detection',
+                financialAid: 'Financial Aid',
+                soilHealth: 'Soil Health Management'
+            },
+            pa: {
+                appTitle: '🌱 ਕ੍ਰਿਸ਼ੀ ਮਿੱਤਰ',
+                appSubtitle: 'ਸਮਾਰਟ ਖੇਤੀਬਾੜੀ ਸਲਾਹਕਾਰ',
+                welcomeTitle: 'ਕ੍ਰਿਸ਼ੀ ਮਿੱਤਰ ਵਿੱਚ ਸਵਾਗਤ ਹੈ',
+                welcomeSubtitle: 'ਬਿਹਤਰ ਖੇਤੀਬਾੜੀ ਫੈਸਲਿਆਂ ਲਈ ਤੁਹਾਡਾ ਸਮਾਰਟ ਖੇਤੀਬਾੜੀ ਸਾਥੀ',
+                navDashboard: 'ਡੈਸ਼ਬੋਰਡ',
+                navCrops: 'ਫਸਲ ਸਲਾਹ',
+                navWeather: 'ਮੌਸਮ',
+                navSoil: 'ਮਿੱਟੀ ਦਾ ਸਿਹਤ',
+                navMarket: 'ਬਾਜ਼ਾਰ ਮੁੱਲ',
+                navCalendar: 'ਖੇਤ ਕੈਲੰਡਰ',
+                emailLabel: 'ਈਮੇਲ ਪਤਾ',
+                passwordLabel: 'ਪਾਸਵਰਡ',
+                loginBtn: 'ਲੌਗਇਨ',
+                registerLink: 'ਕੀ ਤੁਹਾਡਾ ਖਾਤਾ ਨਹੀਂ ਹੈ? ਇੱਥੇ ਰਜਿਸਟਰ ਕਰੋ',
+                currentWeather: 'ਮੌਜੂਦਾ ਮੌਸਮ',
+                weatherAlerts: 'ਮੌਸਮ ਚੇਤਾਵਨੀਆਂ',
+                recommendedCrops: 'ਸਿਫਾਰਸ਼ੀ ਫਸਲਾਂ',
+                marketPrices: 'ਬਾਜ਼ਾਰ ਮੁੱਲ',
+                voiceFeature: 'ਆਵਾਜ਼ ਇਨਪੁਟ',
+                imageDetection: 'ਚਿੱਤਰ-ਆਧਾਰਿਤ ਖੋਜ',
+                financialAid: 'ਵਿੱਤੀ ਸਹਾਇਤਾ',
+                soilHealth: 'ਮਿੱਟੀ ਦਾ ਸਿਹਤ ਪ੍ਰਬੰਧਨ'
+            }
+        };
+
+        let currentLang = 'pa';
+
+        function updateTranslations(lang) {
+            const t = translations[lang];
+            document.getElementById('appTitle').textContent = t.appTitle;
+            document.getElementById('appSubtitle').textContent = t.appSubtitle;
+            document.getElementById('welcomeTitle').textContent = t.welcomeTitle;
+            document.getElementById('welcomeSubtitle').textContent = t.welcomeSubtitle;
+            document.getElementById('navDashboard').textContent = t.navDashboard;
+            document.getElementById('navCrops').textContent = t.navCrops;
+            document.getElementById('navWeather').textContent = t.navWeather;
+            document.getElementById('navSoil').textContent = t.navSoil;
+            document.getElementById('navMarket').textContent = t.navMarket;
+            document.getElementById('navCalendar').textContent = t.navCalendar;
+            document.getElementById('emailLabel').textContent = t.emailLabel;
+            document.getElementById('passwordLabel').textContent = t.passwordLabel;
+            document.getElementById('loginBtn').textContent = t.loginBtn;
+            document.getElementById('registerLink').textContent = t.registerLink;
+            document.getElementById('currentWeather').textContent = t.currentWeather;
+            document.getElementById('weatherAlerts').textContent = t.weatherAlerts;
+            document.getElementById('recommendedCrops').textContent = t.recommendedCrops;
+            document.getElementById('marketPrices').textContent = t.marketPrices;
+            document.getElementById('voiceFeature').textContent = t.voiceFeature;
+            document.getElementById('imageDetection').textContent = t.imageDetection;
+            document.getElementById('financialAid').textContent = t.financialAid;
+            document.getElementById('soilHealth').textContent = t.soilHealth;
+        }
+
+        function switchLanguage() {
+            currentLang = currentLang === 'en' ? 'pa' : 'en';
+            document.getElementById('languageSelect').value = currentLang;
+            updateTranslations(currentLang);
+        }
+
+        // Language selector change event
+        document.getElementById('languageSelect').addEventListener('change', function() {
+            currentLang = this.value;
+            updateTranslations(currentLang);
+        });
+
+        // Initialize with Punjabi
+        updateTranslations('pa');
+    </script>
+</body>
+</html>

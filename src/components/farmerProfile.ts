@@ -1,5 +1,6 @@
 import { Farmer, Location } from '../types';
 import { AuthService } from '../services/authService';
+import { i18n } from '../services/i18nService';
 
 export class FarmerProfile {
   private authService: AuthService;
@@ -31,7 +32,7 @@ export class FarmerProfile {
       <div class="profile-modal-overlay" id="profileModal">
         <div class="profile-modal">
           <div class="profile-modal-header">
-            <h2><i class="fas fa-user"></i> Farmer Profile</h2>
+            <h2><i class="fas fa-user"></i> ${i18n.translate('profile.title')}</h2>
             <button class="close-btn" id="closeProfileModal">
               <i class="fas fa-times"></i>
             </button>
@@ -51,9 +52,9 @@ export class FarmerProfile {
   private renderProfileContent(farmer: Farmer): string {
     return `
       <div class="profile-tabs">
-        <button class="tab-btn active" data-tab="overview">Overview</button>
-        <button class="tab-btn" data-tab="edit">Edit Profile</button>
-        <button class="tab-btn" data-tab="settings">Settings</button>
+        <button class="tab-btn active" data-tab="overview">${i18n.translate('profile.overview')}</button>
+        <button class="tab-btn" data-tab="edit">${i18n.translate('profile.editProfile')}</button>
+        <button class="tab-btn" data-tab="settings">${i18n.translate('profile.settings')}</button>
       </div>
 
       <div class="profile-content">
@@ -96,7 +97,7 @@ export class FarmerProfile {
               <i class="fas fa-seedling"></i>
             </div>
             <div class="stat-content">
-              <h4>Farm Size</h4>
+              <h4>${i18n.translate('profile.farmSize')}</h4>
               <p>${farmer.farmSize} acres</p>
             </div>
           </div>
@@ -106,7 +107,7 @@ export class FarmerProfile {
               <i class="fas fa-calendar-alt"></i>
             </div>
             <div class="stat-content">
-              <h4>Experience</h4>
+              <h4>${i18n.translate('profile.experience')}</h4>
               <p>${farmer.experience} years</p>
             </div>
           </div>
@@ -116,7 +117,7 @@ export class FarmerProfile {
               <i class="fas fa-language"></i>
             </div>
             <div class="stat-content">
-              <h4>Language</h4>
+              <h4>${i18n.translate('profile.language')}</h4>
               <p>${this.getLanguageName(farmer.language)}</p>
             </div>
           </div>
@@ -126,7 +127,7 @@ export class FarmerProfile {
               <i class="fas fa-calendar-plus"></i>
             </div>
             <div class="stat-content">
-              <h4>Member Since</h4>
+              <h4>${i18n.translate('profile.memberSince')}</h4>
               <p>${farmer.createdAt.toLocaleDateString()}</p>
             </div>
           </div>
@@ -135,11 +136,11 @@ export class FarmerProfile {
         <div class="profile-actions">
           <button class="btn btn-secondary" id="editProfileBtn">
             <i class="fas fa-edit"></i>
-            Edit Profile
+            ${i18n.translate('profile.editProfile')}
           </button>
           <button class="btn btn-outline" id="logoutBtn">
             <i class="fas fa-sign-out-alt"></i>
-            Logout
+            ${i18n.translate('ui.logout')}
           </button>
         </div>
       </div>
@@ -564,6 +565,7 @@ export class FarmerProfile {
     switch (code) {
       case 'en': return 'English';
       case 'hi': return 'हिन्दी (Hindi)';
+      case 'pa': return 'ਪੰਜਾਬੀ (Punjabi)';
       case 'regional': return 'Regional';
       default: return 'English';
     }
