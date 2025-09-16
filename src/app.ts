@@ -1,12 +1,18 @@
 import { AppState, Farmer, Location, SoilData, Language } from './types';
 import { CropRecommendationService } from './services/cropRecommendationService';
 import { WeatherService } from './services/weatherService';
+import { AuthService } from './services/authService';
+import { AuthModal } from './components/authModal';
+import { FarmerProfile } from './components/farmerProfile';
 import { mockMarketPrices, mockFinancialSchemes, languages } from './data/mockData';
 
 export class KrishiMitraApp {
   private state: AppState;
   private cropService: CropRecommendationService;
   private weatherService: WeatherService;
+  private authService: AuthService;
+  private authModal: AuthModal | null = null;
+  private farmerProfile: FarmerProfile | null = null;
   private currentView: string = 'dashboard';
 
   constructor() {
@@ -26,9 +32,26 @@ export class KrishiMitraApp {
 
     this.cropService = new CropRecommendationService();
     this.weatherService = new WeatherService();
+    this.authService = new AuthService();
+    
+    // Initialize auth modal and farmer profile
+    this.authModal = new AuthModal(
+      (farmer: Farmer) => this.handleAuthSuccess(farmer),
+      () => this.handleAuthCancel()
+    );
+    
+    this.farmerProfile = new FarmerProfile(
+      (farmer: Farmer | null) => this.handleProfileUpdate(farmer)
+    );
   }
 
   async init(): Promise<void> {
+    // Check for existing user session
+    const existingUser = this.authService.getCurrentUser();
+    if (existingUser) {
+      this.state.currentUser = existingUser;
+    }
+    
     this.render();
     this.setupEventListeners();
     await this.loadInitialData();
@@ -113,10 +136,32 @@ export class KrishiMitraApp {
               <i class="fas fa-microphone"></i>
               Voice
             </button>
-            <button class="user-btn" id="userBtn">
-              <i class="fas fa-user"></i>
-              ${this.state.currentUser ? this.state.currentUser.name : 'Login'}
-            </button>
+            <div class="user-menu">
+              ${this.state.currentUser ? `
+                <button class="user-btn logged-in" id="userBtn">
+                  <i class="fas fa-user-circle"></i>
+                  <span class="user-name">${this.state.currentUser.name}</span>
+                  <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                  <a href="#" class="dropdown-item" id="viewProfile">
+                    <i class="fas fa-user"></i> View Profile
+                  </a>
+                  <a href="#" class="dropdown-item" id="editProfile">
+                    <i class="fas fa-edit"></i> Edit Profile
+                  </a>
+                  <div class="dropdown-divider"></div>
+                  <a href="#" class="dropdown-item" id="logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                  </a>
+                </div>
+              ` : `
+                <button class="user-btn" id="userBtn">
+                  <i class="fas fa-user"></i>
+                  Login / Register
+                </button>
+              `}
+            </div>
           </div>
         </div>
       </header>
@@ -749,13 +794,52 @@ export class KrishiMitraApp {
       });
     }
 
-    // User button
+    // User button and dropdown
     const userBtn = document.getElementById('userBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    
     if (userBtn) {
-      userBtn.addEventListener('click', () => {
-        this.handleUserLogin();
+      userBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.state.currentUser) {
+          // Toggle dropdown for logged-in users
+          userDropdown?.classList.toggle('show');
+        } else {
+          // Show login modal for non-logged-in users
+          this.authModal?.show(true);
+        }
       });
     }
+
+    // User dropdown items
+    document.getElementById('viewProfile')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (this.state.currentUser) {
+        this.farmerProfile?.show(this.state.currentUser);
+        userDropdown?.classList.remove('show');
+      }
+    });
+
+    document.getElementById('editProfile')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (this.state.currentUser) {
+        this.farmerProfile?.show(this.state.currentUser);
+        userDropdown?.classList.remove('show');
+      }
+    });
+
+    document.getElementById('logout')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.handleLogout();
+      userDropdown?.classList.remove('show');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!(e.target as HTMLElement).closest('.user-menu')) {
+        userDropdown?.classList.remove('show');
+      }
+    });
 
     // Image upload for disease detection
     const imageUpload = document.getElementById('imageUpload') as HTMLInputElement;
@@ -804,27 +888,32 @@ export class KrishiMitraApp {
     this.render();
   }
 
-  private handleUserLogin(): void {
-    if (!this.state.currentUser) {
-      const name = prompt('Enter your name:');
-      if (name) {
-        this.state.currentUser = {
-          id: '1',
-          name,
-          email: `${name.toLowerCase()}@example.com`,
-          phone: '+91-9876543210',
-          location: this.state.currentLocation!,
-          language: this.state.selectedLanguage.code as any,
-          farmSize: 2,
-          experience: 5,
-          createdAt: new Date()
-        };
-        this.render();
-      }
-    } else {
+  private handleAuthSuccess(farmer: Farmer): void {
+    this.state.currentUser = farmer;
+    this.state.selectedLanguage = languages.find(lang => lang.code === farmer.language) || languages[0];
+    this.render();
+  }
+
+  private handleAuthCancel(): void {
+    // User cancelled authentication, do nothing
+  }
+
+  private handleProfileUpdate(farmer: Farmer | null): void {
+    if (farmer === null) {
+      // User logged out or deleted account
       this.state.currentUser = null;
-      this.render();
+      this.authService.logout();
+    } else {
+      // Profile was updated
+      this.state.currentUser = farmer;
     }
+    this.render();
+  }
+
+  private handleLogout(): void {
+    this.authService.logout();
+    this.state.currentUser = null;
+    this.render();
   }
 
   private handleImageUpload(event: Event): void {
