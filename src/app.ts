@@ -128,6 +128,7 @@ export class KrishiMitraApp {
             <i class="fas fa-seedling logo-icon"></i>
             <h1 class="app-title">${i18n.translate('app.title')}</h1>
             <span class="app-subtitle">${i18n.translate('app.subtitle')}</span>
+
           </div>
           <div class="header-actions">
             <div class="language-selector">
