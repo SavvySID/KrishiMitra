@@ -161,5 +161,6 @@ export const mockFinancialSchemes: FinancialScheme[] = [
 export const languages: Language[] = [
   { code: 'en', name: 'English', nameNative: 'English' },
   { code: 'hi', name: 'Hindi', nameNative: 'हिंदी' },
+  { code: 'pa', name: 'Punjabi', nameNative: 'ਪੰਜਾਬੀ' },
   { code: 'regional', name: 'Regional', nameNative: 'क्षेत्रीय' }
 ];

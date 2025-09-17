@@ -5,6 +5,7 @@ import { AuthService } from './services/authService';
 import { AuthModal } from './components/authModal';
 import { FarmerProfile } from './components/farmerProfile';
 import { mockMarketPrices, mockFinancialSchemes, languages } from './data/mockData';
+import { i18n } from './services/i18nService';
 
 export class KrishiMitraApp {
   private state: AppState;
@@ -18,7 +19,7 @@ export class KrishiMitraApp {
   constructor() {
     this.state = {
       currentUser: null,
-      selectedLanguage: languages[0], // Default to English
+      selectedLanguage: languages.find(lang => lang.code === i18n.getCurrentLanguage()) || languages[0],
       currentLocation: null,
       weatherData: null,
       soilData: null,
@@ -43,6 +44,12 @@ export class KrishiMitraApp {
     this.farmerProfile = new FarmerProfile(
       (farmer: Farmer | null) => this.handleProfileUpdate(farmer)
     );
+
+    // Listen for language changes
+    i18n.addLanguageChangeListener((language: string) => {
+      this.state.selectedLanguage = languages.find(lang => lang.code === language) || languages[0];
+      this.render();
+    });
   }
 
   async init(): Promise<void> {
@@ -119,17 +126,14 @@ export class KrishiMitraApp {
         <div class="header-content">
           <div class="logo-section">
             <i class="fas fa-seedling logo-icon"></i>
-            <h1 class="app-title">
-              KrishiMitra | कृषिमित्र
-            </h1>
-            <span class="app-subtitle">
-              Smart Agricultural Advisory | स्मार्ट कृषि सलाह
-            </span>
+            <h1 class="app-title">${i18n.translate('app.title')}</h1>
+            <span class="app-subtitle">${i18n.translate('app.subtitle')}</span>
+
           </div>
           <div class="header-actions">
             <div class="language-selector">
               <select id="languageSelect" class="language-dropdown">
-                ${languages.map(lang => 
+                ${i18n.getAvailableLanguages().map(lang => 
                   `<option value="${lang.code}" ${lang.code === this.state.selectedLanguage.code ? 'selected' : ''}>
                     ${lang.nameNative}
                   </option>`
@@ -138,7 +142,7 @@ export class KrishiMitraApp {
             </div>
             <button class="voice-btn" id="voiceBtn">
               <i class="fas fa-microphone"></i>
-              Voice
+              ${i18n.translate('ui.voice')}
             </button>
             <div class="user-menu">
               ${this.state.currentUser ? `
@@ -149,20 +153,20 @@ export class KrishiMitraApp {
                 </button>
                 <div class="user-dropdown" id="userDropdown">
                   <a href="#" class="dropdown-item" id="viewProfile">
-                    <i class="fas fa-user"></i> View Profile
+                    <i class="fas fa-user"></i> ${i18n.translate('ui.viewProfile')}
                   </a>
                   <a href="#" class="dropdown-item" id="editProfile">
-                    <i class="fas fa-edit"></i> Edit Profile
+                    <i class="fas fa-edit"></i> ${i18n.translate('ui.editProfile')}
                   </a>
                   <div class="dropdown-divider"></div>
                   <a href="#" class="dropdown-item" id="logout">
-                    <i class="fas fa-sign-out-alt"></i> Logout
+                    <i class="fas fa-sign-out-alt"></i> ${i18n.translate('ui.logout')}
                   </a>
                 </div>
               ` : `
                 <button class="user-btn" id="userBtn">
                   <i class="fas fa-user"></i>
-                  Login / Register
+                  ${i18n.translate('ui.loginRegister')}
                 </button>
               `}
             </div>
@@ -174,14 +178,14 @@ export class KrishiMitraApp {
 
   private renderNavigation(): string {
     const navItems = [
-      { id: 'dashboard', icon: 'fas fa-home', label: 'Dashboard', labelHindi: 'डैशबोर्ड' },
-      { id: 'crops', icon: 'fas fa-seedling', label: 'Crop Advisory', labelHindi: 'फसल सलाह' },
-      { id: 'weather', icon: 'fas fa-cloud-sun', label: 'Weather', labelHindi: 'मौसम' },
-      { id: 'soil', icon: 'fas fa-mountain', label: 'Soil Health', labelHindi: 'मिट्टी स्वास्थ्य' },
-      { id: 'market', icon: 'fas fa-chart-line', label: 'Market Prices', labelHindi: 'बाजार मूल्य' },
-      { id: 'calendar', icon: 'fas fa-calendar-alt', label: 'Farm Calendar', labelHindi: 'खेत कैलेंडर' },
-      { id: 'diseases', icon: 'fas fa-bug', label: 'Diseases & Pests', labelHindi: 'रोग और कीट' },
-      { id: 'finance', icon: 'fas fa-rupee-sign', label: 'Financial Aid', labelHindi: 'वित्तीय सहायता' }
+      { id: 'dashboard', icon: 'fas fa-home', translationKey: 'nav.dashboard' },
+      { id: 'crops', icon: 'fas fa-seedling', translationKey: 'nav.crops' },
+      { id: 'weather', icon: 'fas fa-cloud-sun', translationKey: 'nav.weather' },
+      { id: 'soil', icon: 'fas fa-mountain', translationKey: 'nav.soil' },
+      { id: 'market', icon: 'fas fa-chart-line', translationKey: 'nav.market' },
+      { id: 'calendar', icon: 'fas fa-calendar-alt', translationKey: 'nav.calendar' },
+      { id: 'diseases', icon: 'fas fa-bug', translationKey: 'nav.diseases' },
+      { id: 'finance', icon: 'fas fa-rupee-sign', translationKey: 'nav.finance' }
     ];
 
     return `
@@ -191,7 +195,7 @@ export class KrishiMitraApp {
             <button class="nav-item ${this.currentView === item.id ? 'active' : ''}" 
                     data-view="${item.id}">
               <i class="${item.icon}"></i>
-              <span class="nav-label">${this.state.selectedLanguage.code === 'hi' ? item.labelHindi : item.label}</span>
+              <span class="nav-label">${i18n.translate(item.translationKey)}</span>
             </button>
           `).join('')}
         </div>
@@ -230,51 +234,51 @@ export class KrishiMitraApp {
       <main class="main-content">
         <div class="dashboard-container">
           <div class="dashboard-header">
-            <h2>Welcome to KrishiMitra</h2>
-            <p>Your smart agricultural companion for better farming decisions</p>
+            <h2>${i18n.translate('app.welcome')}</h2>
+            <p>${i18n.translate('app.welcomeSubtitle')}</p>
           </div>
           
           <div class="dashboard-grid">
             <div class="dashboard-card weather-card">
-              <h3><i class="fas fa-cloud-sun"></i> Current Weather</h3>
+              <h3><i class="fas fa-cloud-sun"></i> ${i18n.translate('dashboard.currentWeather')}</h3>
               ${this.state.weatherData ? `
                 <div class="weather-info">
                   <div class="weather-main">
                     <span class="temperature">${this.state.weatherData.temperature}°C</span>
-                    <span class="humidity">Humidity: ${this.state.weatherData.humidity}%</span>
+                    <span class="humidity">${i18n.translate('dashboard.humidity')}: ${this.state.weatherData.humidity}%</span>
                   </div>
                   <div class="weather-details">
-                    <span>Rainfall: ${this.state.weatherData.rainfall}mm</span>
-                    <span>Wind: ${this.state.weatherData.windSpeed} km/h</span>
+                    <span>${i18n.translate('dashboard.rainfall')}: ${this.state.weatherData.rainfall}mm</span>
+                    <span>${i18n.translate('dashboard.wind')}: ${this.state.weatherData.windSpeed} km/h</span>
                   </div>
                 </div>
-              ` : '<p>Loading weather data...</p>'}
+              ` : `<p>${i18n.translate('ui.loadingWeather')}</p>`}
             </div>
 
             <div class="dashboard-card alerts-card">
-              <h3><i class="fas fa-exclamation-triangle"></i> Weather Alerts</h3>
+              <h3><i class="fas fa-exclamation-triangle"></i> ${i18n.translate('dashboard.weatherAlerts')}</h3>
               <div class="alerts-list">
                 ${weatherAlerts.length > 0 ? 
                   weatherAlerts.map(alert => `<div class="alert-item">${alert}</div>`).join('') :
-                  '<p>No alerts at the moment</p>'
+                  `<p>${i18n.translate('dashboard.noAlerts')}</p>`
                 }
               </div>
             </div>
 
             <div class="dashboard-card crops-card">
-              <h3><i class="fas fa-seedling"></i> Recommended Crops</h3>
+              <h3><i class="fas fa-seedling"></i> ${i18n.translate('dashboard.recommendedCrops')}</h3>
               <div class="crops-list">
                 ${this.state.cropRecommendations.slice(0, 3).map(rec => `
                   <div class="crop-item">
                     <span class="crop-name">${rec.crop.name}</span>
-                    <span class="crop-score">${Math.round(rec.score * 100)}% match</span>
+                    <span class="crop-score">${Math.round(rec.score * 100)}% ${i18n.translate('dashboard.match')}</span>
                   </div>
                 `).join('')}
               </div>
             </div>
 
             <div class="dashboard-card market-card">
-              <h3><i class="fas fa-chart-line"></i> Market Prices</h3>
+              <h3><i class="fas fa-chart-line"></i> ${i18n.translate('dashboard.marketPrices')}</h3>
               <div class="market-list">
                 ${this.state.marketPrices.slice(0, 3).map(price => `
                   <div class="market-item">
@@ -782,11 +786,8 @@ export class KrishiMitraApp {
     const languageSelect = document.getElementById('languageSelect') as HTMLSelectElement;
     if (languageSelect) {
       languageSelect.addEventListener('change', (e) => {
-        const selectedLang = languages.find(lang => lang.code === (e.target as HTMLSelectElement).value);
-        if (selectedLang) {
-          this.state.selectedLanguage = selectedLang;
-          this.render();
-        }
+        const selectedLangCode = (e.target as HTMLSelectElement).value;
+        i18n.setLanguage(selectedLangCode);
       });
     }
 

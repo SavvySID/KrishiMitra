@@ -1,5 +1,6 @@
 import { AuthService, LoginCredentials, RegisterData } from '../services/authService';
 import { Farmer, Location } from '../types';
+import { i18n } from '../services/i18nService';
 
 export class AuthModal {
   private authService: AuthService;
@@ -33,7 +34,7 @@ export class AuthModal {
       <div class="auth-modal-overlay" id="authModal">
         <div class="auth-modal">
           <div class="auth-modal-header">
-            <h2>${isLogin ? 'Login to KrishiMitra' : 'Join KrishiMitra'}</h2>
+            <h2>${isLogin ? i18n.translate('auth.login') : i18n.translate('auth.register')}</h2>
             <button class="close-btn" id="closeAuthModal">
               <i class="fas fa-times"></i>
             </button>
@@ -54,28 +55,26 @@ export class AuthModal {
     return `
       <form class="auth-form" id="loginForm">
         <div class="form-group">
-          <label for="loginEmail">Email Address</label>
+          <label for="loginEmail">${i18n.translate('auth.email')}</label>
           <input type="email" id="loginEmail" name="email" required 
-                 placeholder="Enter your email address">
+                 placeholder="${i18n.translate('ui.enterEmail')}">
         </div>
         
         <div class="form-group">
-          <label for="loginPassword">Password</label>
+          <label for="loginPassword">${i18n.translate('auth.password')}</label>
           <input type="password" id="loginPassword" name="password" required 
-                 placeholder="Enter your password">
+                 placeholder="${i18n.translate('ui.enterPassword')}">
         </div>
         
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">
             <i class="fas fa-sign-in-alt"></i>
-            Login
+            ${i18n.translate('auth.loginBtn')}
           </button>
         </div>
         
         <div class="auth-switch">
-          <p>Don't have an account? 
-            <a href="#" id="switchToRegister">Register here</a>
-          </p>
+          <p>${i18n.translate('auth.switchToRegister')}</p>
         </div>
       </form>
     `;
@@ -86,30 +85,31 @@ export class AuthModal {
       <form class="auth-form" id="registerForm">
         <div class="form-row">
           <div class="form-group">
-            <label for="registerName">Full Name *</label>
+            <label for="registerName">${i18n.translate('auth.fullName')} *</label>
             <input type="text" id="registerName" name="name" required 
-                   placeholder="Enter your full name">
+                   placeholder="${i18n.translate('ui.enterName')}">
           </div>
           
           <div class="form-group">
-            <label for="registerEmail">Email Address *</label>
+            <label for="registerEmail">${i18n.translate('auth.email')} *</label>
             <input type="email" id="registerEmail" name="email" required 
-                   placeholder="Enter your email address">
+                   placeholder="${i18n.translate('ui.enterEmail')}">
           </div>
         </div>
         
         <div class="form-row">
           <div class="form-group">
-            <label for="registerPhone">Mobile Number *</label>
+            <label for="registerPhone">${i18n.translate('auth.mobileNumber')} *</label>
             <input type="tel" id="registerPhone" name="phone" required 
-                   placeholder="Enter 10-digit mobile number">
+                   placeholder="${i18n.translate('ui.enterMobile')}">
           </div>
           
           <div class="form-group">
-            <label for="registerLanguage">Preferred Language *</label>
+            <label for="registerLanguage">${i18n.translate('auth.preferredLanguage')} *</label>
             <select id="registerLanguage" name="language" required>
               <option value="en">English</option>
               <option value="hi">हिन्दी (Hindi)</option>
+              <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
               <option value="regional">Regional</option>
             </select>
           </div>
@@ -117,22 +117,22 @@ export class AuthModal {
         
         <div class="form-row">
           <div class="form-group">
-            <label for="registerPassword">Password *</label>
+            <label for="registerPassword">${i18n.translate('auth.password')} *</label>
             <input type="password" id="registerPassword" name="password" required 
-                   placeholder="Minimum 6 characters">
+                   placeholder="${i18n.translate('ui.minCharacters')}">
           </div>
           
           <div class="form-group">
-            <label for="confirmPassword">Confirm Password *</label>
+            <label for="confirmPassword">${i18n.translate('auth.confirmPassword')} *</label>
             <input type="password" id="confirmPassword" name="confirmPassword" required 
-                   placeholder="Confirm your password">
+                   placeholder="${i18n.translate('ui.confirmPasswordPlaceholder')}">
           </div>
         </div>
         
         <div class="form-group">
-          <label for="locationState">State *</label>
+          <label for="locationState">${i18n.translate('auth.state')} *</label>
           <select id="locationState" name="state" required>
-            <option value="">Select State</option>
+            <option value="">${i18n.translate('ui.selectState')}</option>
             <option value="Delhi">Delhi</option>
             <option value="Punjab">Punjab</option>
             <option value="Haryana">Haryana</option>
@@ -169,29 +169,29 @@ export class AuthModal {
         
         <div class="form-row">
           <div class="form-group">
-            <label for="locationDistrict">District *</label>
+            <label for="locationDistrict">${i18n.translate('auth.district')} *</label>
             <input type="text" id="locationDistrict" name="district" required 
-                   placeholder="Enter your district">
+                   placeholder="${i18n.translate('ui.enterDistrict')}">
           </div>
           
           <div class="form-group">
-            <label for="locationVillage">Village/Town *</label>
+            <label for="locationVillage">${i18n.translate('auth.village')} *</label>
             <input type="text" id="locationVillage" name="village" required 
-                   placeholder="Enter your village or town">
+                   placeholder="${i18n.translate('ui.enterVillage')}">
           </div>
         </div>
         
         <div class="form-row">
           <div class="form-group">
-            <label for="farmSize">Farm Size (acres) *</label>
+            <label for="farmSize">${i18n.translate('auth.farmSize')} *</label>
             <input type="number" id="farmSize" name="farmSize" required min="0.1" step="0.1"
-                   placeholder="Enter farm size in acres">
+                   placeholder="${i18n.translate('ui.enterFarmSize')}">
           </div>
           
           <div class="form-group">
-            <label for="experience">Farming Experience (years) *</label>
+            <label for="experience">${i18n.translate('auth.experience')} *</label>
             <input type="number" id="experience" name="experience" required min="0" max="50"
-                   placeholder="Years of farming experience">
+                   placeholder="${i18n.translate('ui.enterExperience')}">
           </div>
         </div>
         
@@ -199,21 +199,19 @@ export class AuthModal {
           <label class="checkbox-label">
             <input type="checkbox" id="termsAccepted" name="termsAccepted" required>
             <span class="checkmark"></span>
-            I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
+            ${i18n.translate('auth.termsAccepted')}
           </label>
         </div>
         
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">
             <i class="fas fa-user-plus"></i>
-            Create Account
+            ${i18n.translate('auth.registerBtn')}
           </button>
         </div>
         
         <div class="auth-switch">
-          <p>Already have an account? 
-            <a href="#" id="switchToLogin">Login here</a>
-          </p>
+          <p>${i18n.translate('auth.switchToLogin')}</p>
         </div>
       </form>
     `;
@@ -293,7 +291,7 @@ export class AuthModal {
       const response = await this.authService.login(credentials);
       
       if (response.success && response.farmer) {
-        this.showSuccessMessage('Login successful! Welcome back.');
+        this.showSuccessMessage(i18n.translate('auth.loginSuccess'));
         setTimeout(() => {
           this.hide();
           this.onAuthSuccess(response.farmer!);
@@ -302,7 +300,7 @@ export class AuthModal {
         this.showErrorMessage(response.message);
       }
     } catch (error) {
-      this.showErrorMessage('Login failed. Please try again.');
+      this.showErrorMessage(i18n.translate('auth.loginFailed'));
     } finally {
       submitBtn.innerHTML = originalText;
       submitBtn.disabled = false;
@@ -338,7 +336,7 @@ export class AuthModal {
       const response = await this.authService.register(registerData);
       
       if (response.success && response.farmer) {
-        this.showSuccessMessage('Registration successful! Welcome to KrishiMitra.');
+        this.showSuccessMessage(i18n.translate('auth.registerSuccess'));
         setTimeout(() => {
           this.hide();
           this.onAuthSuccess(response.farmer!);
@@ -347,7 +345,7 @@ export class AuthModal {
         this.showErrorMessage(response.message);
       }
     } catch (error) {
-      this.showErrorMessage('Registration failed. Please try again.');
+      this.showErrorMessage(i18n.translate('auth.registerFailed'));
     } finally {
       submitBtn.innerHTML = originalText;
       submitBtn.disabled = false;

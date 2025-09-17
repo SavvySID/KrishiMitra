@@ -6,7 +6,7 @@ export interface Farmer {
   email: string;
   phone: string;
   location: Location;
-  language: 'en' | 'hi' | 'regional';
+  language: 'en' | 'hi' | 'pa' | 'regional';
   farmSize: number; // in acres
   experience: number; // years
   createdAt: Date;
@@ -133,7 +133,7 @@ export interface FinancialScheme {
 }
 
 export interface Language {
-  code: 'en' | 'hi' | 'regional';
+  code: 'en' | 'hi' | 'pa' | 'regional';
   name: string;
   nameNative: string;
 }
