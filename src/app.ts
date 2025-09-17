@@ -1,4 +1,4 @@
-import { AppState, Farmer, Location, SoilData, Language } from './types';
+import { AppState, Farmer, Location, SoilData, Language, MarketPrice } from './types';
 import { CropRecommendationService } from './services/cropRecommendationService';
 import { WeatherService } from './services/weatherService';
 import { AuthService } from './services/authService';
@@ -6,15 +6,20 @@ import { AuthModal } from './components/authModal';
 import { FarmerProfile } from './components/farmerProfile';
 import { mockMarketPrices, mockFinancialSchemes, languages } from './data/mockData';
 import { i18n } from './services/i18nService';
+import { MarketService } from './services/marketService';
 
 export class KrishiMitraApp {
   private state: AppState;
   private cropService: CropRecommendationService;
   private weatherService: WeatherService;
   private authService: AuthService;
+  private marketService: MarketService;
   private authModal: AuthModal | null = null;
   private farmerProfile: FarmerProfile | null = null;
   private currentView: string = 'dashboard';
+  private allMarketPrices: MarketPrice[] = [];
+  private selectedStateFilter: string = 'Punjab';
+  private selectedCropFilter: string = 'all';
 
   constructor() {
     this.state = {
@@ -34,6 +39,8 @@ export class KrishiMitraApp {
     this.cropService = new CropRecommendationService();
     this.weatherService = new WeatherService();
     this.authService = new AuthService();
+    this.marketService = new MarketService();
+    this.allMarketPrices = mockMarketPrices;
     
     // Initialize auth modal and farmer profile
     this.authModal = new AuthModal(
@@ -65,13 +72,16 @@ export class KrishiMitraApp {
   }
 
   private async loadInitialData(): Promise<void> {
-    // Load default location (Delhi for demo)
-    this.state.currentLocation = {
-      state: 'Delhi',
-      district: 'New Delhi',
-      village: 'Central Delhi',
-      coordinates: { lat: 28.6139, lng: 77.2090 }
-    };
+    // Try to get current location via browser geolocation; fallback to Delhi
+    await this.initLocationFromBrowser();
+    if (!this.state.currentLocation) {
+      this.state.currentLocation = {
+        state: 'Delhi',
+        district: 'New Delhi',
+        village: 'Central Delhi',
+        coordinates: { lat: 28.6139, lng: 77.2090 }
+      };
+    }
 
     // Load weather data
     if (this.state.currentLocation) {
@@ -102,7 +112,77 @@ export class KrishiMitraApp {
       );
     }
 
+    // Load live market prices
+    await this.refreshMarketPrices();
+
     this.render();
+  }
+
+  private async initLocationFromBrowser(): Promise<void> {
+    if (!('geolocation' in navigator)) {
+      return;
+    }
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 8000,
+          maximumAge: 60000
+        });
+      });
+      const { latitude, longitude } = position.coords;
+      this.state.currentLocation = {
+        state: 'Current Location',
+        district: 'Nearby',
+        village: 'Current',
+        coordinates: { lat: latitude, lng: longitude }
+      };
+    } catch (err) {
+      // Permission denied or failure: keep undefined to trigger fallback
+    }
+  }
+
+  private async refreshMarketPrices(): Promise<void> {
+    const state = this.selectedStateFilter;
+    const crop = this.selectedCropFilter === 'all' ? undefined : this.selectedCropFilter;
+    const live = await this.marketService.fetchLivePrices(200, state, crop);
+    this.allMarketPrices = Array.isArray(live) && live.length > 0 ? live : this.allMarketPrices;
+    this.applyMarketFilters();
+  }
+
+  private applyMarketFilters(): void {
+    const filteredByState = this.selectedStateFilter === 'all'
+      ? this.allMarketPrices
+      : this.allMarketPrices.filter(p => this.extractState(p.location).toLowerCase() === this.selectedStateFilter.toLowerCase());
+
+    const filteredByCrop = this.selectedCropFilter === 'all'
+      ? filteredByState
+      : filteredByState.filter(p => p.cropName.toLowerCase() === this.selectedCropFilter.toLowerCase());
+
+    this.state.marketPrices = filteredByCrop;
+  }
+
+  private extractState(locationStr: string): string {
+    if (!locationStr) return '';
+    const parts = locationStr.split(',').map(s => s.trim()).filter(Boolean);
+    return parts.length > 0 ? parts[parts.length - 1] : '';
+  }
+
+  private getUniqueStates(): string[] {
+    const set = new Set<string>();
+    this.allMarketPrices.forEach(p => {
+      const st = this.extractState(p.location);
+      if (st) set.add(st);
+    });
+    return Array.from(set).sort();
+  }
+
+  private getUniqueCrops(): string[] {
+    const set = new Set<string>();
+    this.allMarketPrices.forEach(p => {
+      if (p.cropName) set.add(p.cropName);
+    });
+    return Array.from(set).sort();
   }
 
   private render(): void {
@@ -355,6 +435,10 @@ export class KrishiMitraApp {
               <h3>Current Conditions</h3>
               <div class="weather-grid">
                 <div class="weather-metric">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Location: ${this.state.currentLocation ? `${this.state.currentLocation.district}, ${this.state.currentLocation.state}` : '—'}</span>
+                </div>
+                <div class="weather-metric">
                   <i class="fas fa-thermometer-half"></i>
                   <span>Temperature: ${this.state.weatherData.temperature}°C</span>
                 </div>
@@ -364,11 +448,15 @@ export class KrishiMitraApp {
                 </div>
                 <div class="weather-metric">
                   <i class="fas fa-cloud-rain"></i>
-                  <span>Rainfall: ${this.state.weatherData.rainfall}mm</span>
+                  <span>Rainfall: ${this.state.weatherData.rainfall} mm</span>
                 </div>
                 <div class="weather-metric">
                   <i class="fas fa-wind"></i>
                   <span>Wind Speed: ${this.state.weatherData.windSpeed} km/h</span>
+                </div>
+                <div class="weather-metric">
+                  <i class="fas fa-tachometer-alt"></i>
+                  <span>Pressure: ${this.state.weatherData.pressure} hPa</span>
                 </div>
               </div>
             </div>
@@ -378,10 +466,10 @@ export class KrishiMitraApp {
               <div class="forecast-grid">
                 ${this.state.weatherData.forecast.map(day => `
                   <div class="forecast-card">
-                    <div class="forecast-date">${day.date.toLocaleDateString()}</div>
+                    <div class="forecast-date">${new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
                     <div class="forecast-temp">
-                      <span class="max-temp">${Math.round(day.temperature.max)}°</span>
-                      <span class="min-temp">${Math.round(day.temperature.min)}°</span>
+                      <span class="max-temp">${Math.round(day.temperature.max)}°C</span>
+                      <span class="min-temp">${Math.round(day.temperature.min)}°C</span>
                     </div>
                     <div class="forecast-condition">
                       <i class="fas fa-${this.getWeatherIcon(day.condition)}"></i>
@@ -389,7 +477,7 @@ export class KrishiMitraApp {
                     </div>
                     <div class="forecast-details">
                       <span>Humidity: ${Math.round(day.humidity)}%</span>
-                      <span>Rain: ${Math.round(day.rainfall)}mm</span>
+                      <span>Rain: ${Math.round(day.rainfall)} mm</span>
                     </div>
                   </div>
                 `).join('')}
@@ -489,16 +577,18 @@ export class KrishiMitraApp {
   }
 
   private renderMarketPrices(): string {
+    const crops = this.getUniqueCrops();
     return `
       <main class="main-content">
         <div class="market-prices-container">
           <h2>Market Intelligence</h2>
           <div class="market-filters">
-            <select id="locationFilter" class="filter-select">
-              <option value="all">All Locations</option>
-              <option value="delhi">Delhi</option>
-              <option value="punjab">Punjab</option>
-              <option value="gujarat">Gujarat</option>
+            <select id="stateFilter" class="filter-select">
+              <option value="Punjab" ${this.selectedStateFilter === 'Punjab' ? 'selected' : ''}>Punjab</option>
+            </select>
+            <select id="cropFilter" class="filter-select">
+              <option value="all" ${this.selectedCropFilter === 'all' ? 'selected' : ''}>All Crops</option>
+              ${crops.map(c => `<option value="${c}" ${this.selectedCropFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
             </select>
             <button class="refresh-btn" id="refreshPrices">
               <i class="fas fa-sync-alt"></i> Refresh Prices
@@ -856,6 +946,34 @@ export class KrishiMitraApp {
       
       imageUpload.addEventListener('change', (e) => {
         this.handleImageUpload(e);
+      });
+    }
+
+    // Refresh prices
+    const refreshBtn = document.getElementById('refreshPrices');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', async () => {
+        await this.refreshMarketPrices();
+        this.render();
+      });
+    }
+
+    // Filters
+    const stateFilter = document.getElementById('stateFilter') as HTMLSelectElement;
+    if (stateFilter) {
+      stateFilter.addEventListener('change', (e) => {
+        this.selectedStateFilter = (e.target as HTMLSelectElement).value;
+        this.applyMarketFilters();
+        this.render();
+      });
+    }
+
+    const cropFilter = document.getElementById('cropFilter') as HTMLSelectElement;
+    if (cropFilter) {
+      cropFilter.addEventListener('change', (e) => {
+        this.selectedCropFilter = (e.target as HTMLSelectElement).value;
+        this.applyMarketFilters();
+        this.render();
       });
     }
   }
