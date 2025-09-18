@@ -11,6 +11,13 @@ import { PestDetectionService } from './services/pestDetectionService';
 import { MarketService } from './services/marketService';
 
 export class KrishiMitraApp {
+  private getUniqueCrops(): string[] {
+    const set = new Set<string>();
+    (this.state.marketPrices || []).forEach(p => {
+      if (p.cropName) set.add(p.cropName);
+    });
+    return Array.from(set).sort();
+  }
   private state: AppState;
   private cropService: CropRecommendationService;
   private weatherService: WeatherService;
@@ -191,13 +198,6 @@ export class KrishiMitraApp {
     return Array.from(set).sort();
   }
 
-  private getUniqueCrops(): string[] {
-    const set = new Set<string>();
-    this.allMarketPrices.forEach(p => {
-      if (p.cropName) set.add(p.cropName);
-    });
-    return Array.from(set).sort();
-  }
 
   private render(): void {
     const appElement = document.querySelector<HTMLDivElement>('#app')!;
@@ -577,8 +577,7 @@ export class KrishiMitraApp {
   }
 
   private renderMarketPrices(): string {
-    const alerts = this.marketService.getPriceAlerts(this.state.marketPrices);
-    const crops = this.getUniqueCrops();
+  const crops = this.getUniqueCrops();
     return `
       <main class="main-content">
         <div class="market-prices-container">
@@ -589,20 +588,13 @@ export class KrishiMitraApp {
             </select>
             <select id="cropFilter" class="filter-select">
               <option value="all" ${this.selectedCropFilter === 'all' ? 'selected' : ''}>All Crops</option>
-              ${crops.map(c => `<option value="${c}" ${this.selectedCropFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
+              ${crops.map((c: string) => `<option value="${c}" ${this.selectedCropFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
             </select>
             <button class="refresh-btn" id="refreshPrices">
               <i class="fas fa-sync-alt"></i> Refresh Prices
             </button>
           </div>
           
-          ${alerts && alerts.length ? `
-          <div class="price-alerts">
-            <h3>Price Alerts</h3>
-            <ul class="alerts-list">
-              ${alerts.map((a: string) => `<li class="alert-item">${a}</li>`).join('')}
-            </ul>
-          </div>` : ''}
           
           <div class="prices-grid">
             ${this.state.marketPrices.map(price => `

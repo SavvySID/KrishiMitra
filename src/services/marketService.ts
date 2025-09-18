@@ -9,26 +9,23 @@ export class MarketService {
   /**
    * Fetch latest market prices from data.gov.in API and update cache
    */
-  async fetchLivePrices(limit: number = 50, state?: string, commodity?: string): Promise<MarketPrice[]> {
+  async fetchLivePrices(limit: number = 100, state?: string, crop?: string): Promise<MarketPrice[]> {
     try {
-      const params: string[] = [
-        `api-key=${encodeURIComponent(this.apiKey)}`,
-        `format=json`,
-        `limit=${encodeURIComponent(String(limit))}`
-      ];
-      if (state && state.toLowerCase() !== 'all') {
-        params.push(`filters[state]=${encodeURIComponent(state)}`);
+      const url = new URL(this.baseUrl);
+      url.searchParams.set('api-key', this.apiKey);
+      url.searchParams.set('format', 'json');
+      url.searchParams.set('limit', String(limit));
+      if (state && state !== 'all') url.searchParams.set('filters[state]', state);
+      if (crop) url.searchParams.set('filters[commodity]', crop);
+
+      const resp = await fetch(url.toString());
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+
+      const records: any[] = Array.isArray(data.records) ? data.records : [];
+      if (records.length === 0) {
+        throw new Error('No records from API');
       }
-      if (commodity && commodity.toLowerCase() !== 'all') {
-        params.push(`filters[commodity]=${encodeURIComponent(commodity)}`);
-      }
-      const url = `${this.baseUrl}?${params.join('&')}`;
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const data = await response.json();
-      const records = Array.isArray(data?.records) ? data.records : [];
 
       const mapped: MarketPrice[] = records.map((r: any) => {
         const commodity: string = r?.commodity || 'Unknown';
@@ -73,9 +70,8 @@ export class MarketService {
           location: locationStr || 'N/A',
           date,
           trend
-        } as MarketPrice;
+        };
       });
-
       if (mapped.length > 0) {
         this.marketPrices = mapped;
         return mapped;

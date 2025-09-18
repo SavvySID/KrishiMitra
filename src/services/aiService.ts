@@ -21,7 +21,7 @@ export class AIService {
     const useGroq = Boolean(this.groqKey);
     console.log(useGroq)
     const doCall = async (): Promise<string> => {
-      if (useGroq) {
+  if (useGroq) {
         // Groq OpenAI-compatible Chat Completions
         const groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
@@ -77,7 +77,7 @@ export class AIService {
         throw lastErr || new Error('Groq request failed');
       } else {
         // Fallback to Gemini if Groq is not available
-        const geminiKey = (import.meta as any)?.env?.VITE_GEMINI_API_KEY;
+        const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
         if (!geminiKey) {
           throw new Error('No AI API key configured');
         }

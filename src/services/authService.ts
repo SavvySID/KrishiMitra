@@ -18,7 +18,6 @@ export interface RegisterData {
 }
 
 export interface AuthResponse {
-  success: boolean;
   message: string;
   farmer?: Farmer;
 }
@@ -42,10 +41,9 @@ export class AuthService {
       // Validate input data
       const validation = this.validateRegistrationData(data);
       if (!validation.isValid) {
-      return Promise.resolve({
-        success: false,
-        message: validation.message
-      });
+        return {
+          message: validation.message
+        };
       }
 
       // Check if farmer already exists
@@ -53,8 +51,7 @@ export class AuthService {
       const existingFarmer = existingFarmers.find(f => f.email === data.email);
       
       if (existingFarmer) {
-        return Promise.resolve({
-          success: false,
+        return {
           message: 'A farmer with this email already exists'
         });
       }
@@ -79,14 +76,13 @@ export class AuthService {
       // Auto-login after registration
       this.setCurrentUser(newFarmer);
 
-      return Promise.resolve({
-        success: true,
+      return {
         message: 'Registration successful! Welcome to KrishiMitra.',
         farmer: newFarmer
       });
     } catch (error) {
-      return Promise.resolve({
-        success: false,
+
+      return {
         message: 'Registration failed. Please try again.'
       });
     }
@@ -98,8 +94,9 @@ export class AuthService {
       const farmer = farmers.find(f => f.email === credentials.email);
 
       if (!farmer) {
-        return Promise.resolve({
-          success: false,
+
+        return {
+
           message: 'No farmer found with this email address'
         });
       }
@@ -108,14 +105,13 @@ export class AuthService {
       // For demo purposes, we'll accept any password
       this.setCurrentUser(farmer);
 
-      return Promise.resolve({
-        success: true,
+
+      return {
         message: 'Login successful!',
         farmer: farmer
       });
     } catch (error) {
-      return Promise.resolve({
-        success: false,
+      return {
         message: 'Login failed. Please try again.'
       });
     }
@@ -141,32 +137,22 @@ export class AuthService {
   }
 
   updateFarmerProfile(updatedFarmer: Farmer): Promise<AuthResponse> {
-    try {
-      const farmers = this.getStoredFarmers();
-      const farmerIndex = farmers.findIndex(f => f.id === updatedFarmer.id);
-      
-      if (farmerIndex === -1) {
-        return {
-          success: false,
-          message: 'Farmer not found'
-        };
+    return new Promise((resolve) => {
+      try {
+        const farmers = this.getStoredFarmers();
+        const farmerIndex = farmers.findIndex(f => f.id === updatedFarmer.id);
+        if (farmerIndex === -1) {
+          resolve({ message: 'Farmer not found' });
+          return;
+        }
+        farmers[farmerIndex] = updatedFarmer;
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(farmers));
+        this.setCurrentUser(updatedFarmer);
+        resolve({ message: 'Profile updated successfully', farmer: updatedFarmer });
+      } catch (error) {
+        resolve({ message: 'Profile update failed. Please try again.' });
       }
-
-      farmers[farmerIndex] = updatedFarmer;
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(farmers));
-      this.setCurrentUser(updatedFarmer);
-
-      return {
-        success: true,
-        message: 'Profile updated successfully',
-        farmer: updatedFarmer
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'Profile update failed. Please try again.'
-      };
-    }
+    });
   }
 
   private validateRegistrationData(data: RegisterData): { isValid: boolean; message: string } {
@@ -244,34 +230,24 @@ export class AuthService {
 
   // Delete farmer account
   deleteFarmer(farmerId: string): Promise<AuthResponse> {
-    try {
-      const farmers = this.getStoredFarmers();
-      const filteredFarmers = farmers.filter(f => f.id !== farmerId);
-      
-      if (filteredFarmers.length === farmers.length) {
-        return {
-          success: false,
-          message: 'Farmer not found'
-        };
+    return new Promise((resolve) => {
+      try {
+        const farmers = this.getStoredFarmers();
+        const filteredFarmers = farmers.filter(f => f.id !== farmerId);
+        if (filteredFarmers.length === farmers.length) {
+          resolve({ message: 'Farmer not found' });
+          return;
+        }
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredFarmers));
+        // If deleting current user, logout
+        const currentUser = this.getCurrentUser();
+        if (currentUser && currentUser.id === farmerId) {
+          this.logout();
+        }
+        resolve({ message: 'Account deleted successfully' });
+      } catch (error) {
+        resolve({ message: 'Account deletion failed. Please try again.' });
       }
-
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredFarmers));
-      
-      // If deleting current user, logout
-      const currentUser = this.getCurrentUser();
-      if (currentUser && currentUser.id === farmerId) {
-        this.logout();
-      }
-
-      return {
-        success: true,
-        message: 'Account deleted successfully'
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'Account deletion failed. Please try again.'
-      };
-    }
+    });
   }
 }
