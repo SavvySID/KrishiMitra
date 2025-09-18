@@ -1,17 +1,10 @@
 export class AIService {
   // Provider selection: prefer Groq if configured, else Gemini
-  private readonly groqKey: string | undefined =
-    (import.meta as any)?.env?.VITE_GROQ_API_KEY ||
-    (import.meta as any)?.env?.vite_groq_api_key ||
-    (typeof localStorage !== 'undefined' ? localStorage.getItem('krishi_groq_key') || undefined : undefined);
+  private readonly groqKey: string =
+    import.meta.env.VITE_GROQ_API_KEY;
   private readonly groqModel: string =
-    (import.meta as any)?.env?.VITE_GROQ_MODEL ||
-    (import.meta as any)?.env?.vite_groq_model ||
+    import.meta.env.VITE_GROQ_MODEL ||
     'llama-3.1-8b-instant';
-  private readonly geminiKey: string | undefined =
-    (import.meta as any)?.env?.VITE_GEMINI_API_KEY ||
-    (import.meta as any)?.env?.vite_gemini_api_key;
-  private readonly geminiEndpoint: string = (import.meta as any)?.env?.VITE_GEMINI_ENDPOINT || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
   async getCropAdvisory(prompt: string, language: 'en' | 'hi' | 'pa' | 'regional' = 'en'): Promise<string> {
     const system = this.buildSystemPrompt(language);
@@ -24,8 +17,9 @@ export class AIService {
         maxOutputTokens: 512
       }
     } as any;
-
+    console.log(this.groqKey)
     const useGroq = Boolean(this.groqKey);
+    console.log(useGroq)
     const doCall = async (): Promise<string> => {
       if (useGroq) {
         // Groq OpenAI-compatible Chat Completions
@@ -55,7 +49,7 @@ export class AIService {
             const msg = data?.error?.message || data?.message || `HTTP ${resp.status}`;
             throw new Error(msg);
           }
-          const text = data?.choices?.[0]?.message?.content || '';
+          const text = data?.choices?.[0]?.message?.content.replaceAll("*",'') || '';
           return text || 'No advice available.';
         };
 
@@ -81,27 +75,6 @@ export class AIService {
           }
         }
         throw lastErr || new Error('Groq request failed');
-      } else {
-        // Gemini fallback
-        if (!this.geminiKey) throw new Error('Missing Gemini API key');
-        const url = `${this.geminiEndpoint}?key=${encodeURIComponent(this.geminiKey)}`;
-        const resp = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        let data: any = null;
-        try { data = await resp.json(); } catch {}
-        if (!resp.ok) {
-          console.warn('Gemini error', resp.status, data);
-          const msg = data?.error?.message || data?.message || `HTTP ${resp.status}`;
-          throw new Error(msg);
-        }
-        const candidates = data?.candidates || [];
-        const first = candidates[0];
-        const parts = first?.content?.parts || first?.content || [];
-        const text = (Array.isArray(parts) ? parts[0]?.text : parts?.text) || data?.text || '';
-        return text || 'No advice available.';
       }
     };
 
