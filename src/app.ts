@@ -191,13 +191,6 @@ export class KrishiMitraApp {
     return Array.from(set).sort();
   }
 
-  private getUniqueCrops(): string[] {
-    const set = new Set<string>();
-    this.allMarketPrices.forEach(p => {
-      if (p.cropName) set.add(p.cropName);
-    });
-    return Array.from(set).sort();
-  }
 
   private render(): void {
     const appElement = document.querySelector<HTMLDivElement>('#app')!;
@@ -577,8 +570,7 @@ export class KrishiMitraApp {
   }
 
   private renderMarketPrices(): string {
-    const alerts = this.marketService.getPriceAlerts(this.state.marketPrices);
-    const crops = this.getUniqueCrops();
+  const crops = this.getUniqueCrops();
     return `
       <main class="main-content">
         <div class="market-prices-container">
@@ -596,13 +588,6 @@ export class KrishiMitraApp {
             </button>
           </div>
           
-          ${alerts && alerts.length ? `
-          <div class="price-alerts">
-            <h3>Price Alerts</h3>
-            <ul class="alerts-list">
-              ${alerts.map((a: string) => `<li class="alert-item">${a}</li>`).join('')}
-            </ul>
-          </div>` : ''}
           
           <div class="prices-grid">
             ${this.state.marketPrices.map(price => `
