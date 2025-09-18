@@ -324,7 +324,7 @@ export class AuthModal {
       },
       farmSize: parseFloat(formData.get('farmSize') as string),
       experience: parseInt(formData.get('experience') as string),
-    language: formData.get('language') as 'en' | 'hi' | 'regional'
+      language: formData.get('language') as 'en' | 'hi' | 'regional'
     };
 
     const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;

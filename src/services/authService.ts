@@ -53,7 +53,7 @@ export class AuthService {
       if (existingFarmer) {
         return {
           message: 'A farmer with this email already exists'
-        });
+        };
       }
 
       // Create new farmer
@@ -79,12 +79,12 @@ export class AuthService {
       return {
         message: 'Registration successful! Welcome to KrishiMitra.',
         farmer: newFarmer
-      });
+      };
     } catch (error) {
 
       return {
         message: 'Registration failed. Please try again.'
-      });
+      };
     }
   }
 
@@ -96,9 +96,8 @@ export class AuthService {
       if (!farmer) {
 
         return {
-
           message: 'No farmer found with this email address'
-        });
+        };
       }
 
       // In a real app, you would verify the password hash here
@@ -109,11 +108,11 @@ export class AuthService {
       return {
         message: 'Login successful!',
         farmer: farmer
-      });
+      };
     } catch (error) {
       return {
         message: 'Login failed. Please try again.'
-      });
+      };
     }
   }
 
