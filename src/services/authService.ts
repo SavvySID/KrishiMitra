@@ -14,7 +14,7 @@ export interface RegisterData {
   location: Location;
   farmSize: number;
   experience: number;
-  language: 'en' | 'hi' | 'pa' | 'regional';
+  language: 'en' | 'hi' | 'regional';
 }
 
 export interface AuthResponse {
@@ -53,7 +53,7 @@ export class AuthService {
       if (existingFarmer) {
         return {
           message: 'A farmer with this email already exists'
-        });
+        };
       }
 
       // Create new farmer
@@ -79,12 +79,11 @@ export class AuthService {
       return {
         message: 'Registration successful! Welcome to KrishiMitra.',
         farmer: newFarmer
-      });
+      };
     } catch (error) {
-
       return {
         message: 'Registration failed. Please try again.'
-      });
+      };
     }
   }
 
@@ -94,26 +93,23 @@ export class AuthService {
       const farmer = farmers.find(f => f.email === credentials.email);
 
       if (!farmer) {
-
         return {
-
           message: 'No farmer found with this email address'
-        });
+        };
       }
 
       // In a real app, you would verify the password hash here
       // For demo purposes, we'll accept any password
       this.setCurrentUser(farmer);
 
-
       return {
         message: 'Login successful!',
         farmer: farmer
-      });
+      };
     } catch (error) {
       return {
         message: 'Login failed. Please try again.'
-      });
+      };
     }
   }
 

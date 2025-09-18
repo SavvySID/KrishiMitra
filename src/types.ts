@@ -169,7 +169,7 @@ export interface DetectionResult {
   label: string; // normalized canonical label
   displayName: string; // human-friendly
   confidence: number; // 0..1
-  category: 'pest' | 'disease' | 'nutrient_deficiency' | 'healthy' | 'unknown';
+  category: 'pest' | 'disease' | 'nutrient_deficiency' | 'unknown';
   pestInfo?: {
     scientificName?: string;
     overview?: string;
