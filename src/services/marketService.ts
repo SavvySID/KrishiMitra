@@ -1,10 +1,94 @@
-import { MarketPrice, Location } from '../types';
+import { MarketPrice } from '../types';
 import { mockMarketPrices } from '../data/mockData';
 
 export class MarketService {
   private readonly apiKey: string = (import.meta as any)?.env?.VITE_MARKET_API_KEY || '579b464db66ec23bdd0000012961ac8a5fab4b7b61fd1ef6e09641ea';
   private readonly baseUrl: string = (import.meta as any)?.env?.VITE_MARKET_API_BASE || 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070';
   private marketPrices: MarketPrice[] = mockMarketPrices;
+  private readonly apiKey: string = '579b464db66ec23bdd0000012961ac8a5fab4b7b61fd1ef6e09641ea';
+  private readonly baseUrl: string = 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070';
+
+  /**
+   * Fetch latest market prices from data.gov.in API and update cache
+   */
+  async fetchLivePrices(limit: number = 50, state?: string, commodity?: string): Promise<MarketPrice[]> {
+    try {
+      const params: string[] = [
+        `api-key=${encodeURIComponent(this.apiKey)}`,
+        `format=json`,
+        `limit=${encodeURIComponent(String(limit))}`
+      ];
+      if (state && state.toLowerCase() !== 'all') {
+        params.push(`filters[state]=${encodeURIComponent(state)}`);
+      }
+      if (commodity && commodity.toLowerCase() !== 'all') {
+        params.push(`filters[commodity]=${encodeURIComponent(commodity)}`);
+      }
+      const url = `${this.baseUrl}?${params.join('&')}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      const records = Array.isArray(data?.records) ? data.records : [];
+
+      const mapped: MarketPrice[] = records.map((r: any) => {
+        const commodity: string = r?.commodity || 'Unknown';
+        const locationStr: string = [r?.market, r?.district, r?.state].filter(Boolean).join(', ');
+        const modalPriceNum = Number(r?.modal_price);
+        const minPriceNum = Number(r?.min_price);
+        const maxPriceNum = Number(r?.max_price);
+        const price = isFinite(modalPriceNum) && modalPriceNum > 0
+          ? modalPriceNum
+          : isFinite(minPriceNum) && isFinite(maxPriceNum)
+            ? Math.round(((minPriceNum + maxPriceNum) / 2) * 100) / 100
+            : 0;
+        const unit: 'kg' | 'quintal' | 'tonne' = 'quintal';
+
+        // Heuristic trend based on modal vs avg(min,max)
+        let trend: 'up' | 'down' | 'stable' = 'stable';
+        if (isFinite(minPriceNum) && isFinite(maxPriceNum) && isFinite(modalPriceNum)) {
+          const avg = (minPriceNum + maxPriceNum) / 2;
+          const diff = modalPriceNum - avg;
+          if (diff > avg * 0.03) trend = 'up';
+          else if (diff < -avg * 0.03) trend = 'down';
+        }
+
+        // Parse date dd/mm/yyyy
+        let date = new Date();
+        const dateStr: string = r?.arrival_date;
+        if (typeof dateStr === 'string') {
+          const parts = dateStr.replace(/\./g, '/').split(/[\/]/);
+          if (parts.length === 3) {
+            const [dd, mm, yyyy] = parts.map(p => parseInt(p, 10));
+            if (!isNaN(dd) && !isNaN(mm) && !isNaN(yyyy)) {
+              date = new Date(yyyy, mm - 1, dd);
+            }
+          }
+        }
+
+        return {
+          cropId: commodity.toLowerCase().replace(/\s+/g, '-'),
+          cropName: commodity,
+          price,
+          unit,
+          location: locationStr || 'N/A',
+          date,
+          trend
+        } as MarketPrice;
+      });
+
+      if (mapped.length > 0) {
+        this.marketPrices = mapped;
+        return mapped;
+      }
+      // If API returned empty, keep existing cache and return it
+      return this.marketPrices;
+    } catch (error) {
+      console.error('Failed to fetch live market prices:', error);
+      return this.marketPrices;
+    }
+  }
 
   /**
    * Get current market prices for all crops
