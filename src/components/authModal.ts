@@ -290,7 +290,7 @@ export class AuthModal {
     try {
       const response = await this.authService.login(credentials);
       
-      if (response.success && response.farmer) {
+  if (response.farmer) {
         this.showSuccessMessage(i18n.translate('auth.loginSuccess'));
         setTimeout(() => {
           this.hide();
@@ -324,7 +324,7 @@ export class AuthModal {
       },
       farmSize: parseFloat(formData.get('farmSize') as string),
       experience: parseInt(formData.get('experience') as string),
-      language: formData.get('language') as 'en' | 'hi' | 'pa' | 'regional'
+    language: formData.get('language') as 'en' | 'hi' | 'regional'
     };
 
     const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
@@ -335,7 +335,7 @@ export class AuthModal {
     try {
       const response = await this.authService.register(registerData);
       
-      if (response.success && response.farmer) {
+  if (response.farmer) {
         this.showSuccessMessage(i18n.translate('auth.registerSuccess'));
         setTimeout(() => {
           this.hide();
