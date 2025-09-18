@@ -74,7 +74,7 @@ export class AuthModal {
         </div>
         
         <div class="auth-switch">
-          <p>${i18n.translate('auth.switchToRegister')}</p>
+          <p>${i18n.translate('auth.switchToRegister')} <a href="#" id="switchToRegister">${i18n.translate('auth.registerBtn')}</a></p>
         </div>
       </form>
     `;
@@ -211,7 +211,7 @@ export class AuthModal {
         </div>
         
         <div class="auth-switch">
-          <p>${i18n.translate('auth.switchToLogin')}</p>
+          <p>${i18n.translate('auth.switchToLogin')} <a href="#" id="switchToLogin">${i18n.translate('auth.loginBtn')}</a></p>
         </div>
       </form>
     `;
@@ -324,7 +324,7 @@ export class AuthModal {
       },
       farmSize: parseFloat(formData.get('farmSize') as string),
       experience: parseInt(formData.get('experience') as string),
-      language: formData.get('language') as 'en' | 'hi' | 'regional'
+      language: formData.get('language') as 'en' | 'hi' | 'pa' | 'regional'
     };
 
     const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
