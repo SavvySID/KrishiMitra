@@ -2,6 +2,8 @@ import { MarketPrice } from '../types';
 import { mockMarketPrices } from '../data/mockData';
 
 export class MarketService {
+  private readonly apiKey: string = (import.meta as any)?.env?.VITE_MARKET_API_KEY || '579b464db66ec23bdd0000012961ac8a5fab4b7b61fd1ef6e09641ea';
+  private readonly baseUrl: string = (import.meta as any)?.env?.VITE_MARKET_API_BASE || 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070';
   private marketPrices: MarketPrice[] = mockMarketPrices;
   private readonly apiKey: string = '579b464db66ec23bdd0000012961ac8a5fab4b7b61fd1ef6e09641ea';
   private readonly baseUrl: string = 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070';
@@ -93,6 +95,90 @@ export class MarketService {
    */
   getAllMarketPrices(): MarketPrice[] {
     return this.marketPrices;
+  }
+
+  /**
+   * Try to fetch live prices from a remote API. Falls back to mock data on any error.
+   */
+  async fetchLivePrices(limit: number = 100, state?: string, crop?: string): Promise<MarketPrice[]> {
+    try {
+      const url = new URL(this.baseUrl);
+      url.searchParams.set('api-key', this.apiKey);
+      url.searchParams.set('format', 'json');
+      url.searchParams.set('limit', String(limit));
+      if (state && state !== 'all') url.searchParams.set('filters[state]', state);
+      if (crop) url.searchParams.set('filters[commodity]', crop);
+
+      const resp = await fetch(url.toString());
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+
+      const records: any[] = Array.isArray(data.records) ? data.records : [];
+      if (records.length === 0) {
+        throw new Error('No records from API');
+      }
+
+      const parsed: MarketPrice[] = records.map((r: any) => ({
+        cropId: String(r.commodity || '').toLowerCase(),
+        cropName: String(r.commodity || 'Unknown'),
+        price: Number(r.modal_price || r.min_price || r.max_price || 0),
+        unit: 'quintal',
+        location: [r.market, r.district, r.state].filter(Boolean).join(', '),
+        date: new Date(r.arrival_date || Date.now()),
+        trend: 'stable'
+      }));
+
+      // Simple trend estimation: compare modal vs min/max if present
+      parsed.forEach((p, i) => {
+        const rec = records[i];
+        const min = Number(rec.min_price || p.price);
+        const max = Number(rec.max_price || p.price);
+        p.trend = p.price > (min + max) / 2 ? 'up' : p.price < (min + max) / 2 ? 'down' : 'stable';
+      });
+
+      this.marketPrices = parsed;
+      return parsed;
+    } catch (err) {
+      console.warn('fetchLivePrices failed, using fallback:', err);
+      this.marketPrices = mockMarketPrices;
+      return this.marketPrices;
+    }
+  }
+
+  /**
+   * Generate price alerts based on current marketPrices
+   */
+  getPriceAlerts(prices: MarketPrice[] = this.marketPrices): string[] {
+    const alerts: string[] = [];
+    if (!prices || prices.length === 0) return alerts;
+
+    // High price alerts (top 10%)
+    const sorted = [...prices].sort((a, b) => b.price - a.price);
+    const top = sorted.slice(0, Math.max(1, Math.floor(sorted.length * 0.1)));
+    top.forEach(p => {
+      alerts.push(`${p.cropName} high price at ₹${p.price}/${p.unit} in ${p.location}`);
+    });
+
+    // Trend-based alerts
+    const upItems = prices.filter(p => p.trend === 'up').slice(0, 3);
+    const downItems = prices.filter(p => p.trend === 'down').slice(0, 3);
+    if (upItems.length) {
+      alerts.push(`Uptrend: ${upItems.map(p => p.cropName).join(', ')}`);
+    }
+    if (downItems.length) {
+      alerts.push(`Downtrend: ${downItems.map(p => p.cropName).join(', ')}`);
+    }
+
+    // Location-specific best price
+    const byCrop: Record<string, MarketPrice> = {};
+    prices.forEach(p => {
+      const key = p.cropName.toLowerCase();
+      if (!byCrop[key] || p.price > byCrop[key].price) byCrop[key] = p;
+    });
+    const best = Object.values(byCrop).slice(0, 3);
+    best.forEach(p => alerts.push(`Best ${p.cropName} price in ${p.location}: ₹${p.price}/${p.unit}`));
+
+    return Array.from(new Set(alerts)).slice(0, 8);
   }
 
   /**

@@ -150,4 +150,30 @@ export interface AppState {
   diseases: Disease[];
   pests: Pest[];
   financialSchemes: FinancialScheme[];
+  detectionHistory?: DetectionRecord[];
+}
+
+// Image-based detection types
+export interface DetectionRecord {
+  id: string;
+  userId?: string;
+  imageUrl: string; // object URL or remote URL
+  thumbnailUrl?: string;
+  cropType?: string;
+  createdAt: Date;
+  result: DetectionResult;
+}
+
+export interface DetectionResult {
+  model: string; // e.g., 'mock-plantvillage-v1'
+  label: string; // normalized canonical label
+  displayName: string; // human-friendly
+  confidence: number; // 0..1
+  category: 'pest' | 'disease' | 'nutrient_deficiency' | 'unknown';
+  pestInfo?: {
+    scientificName?: string;
+    overview?: string;
+    prevention?: string[];
+    treatment?: string[];
+  };
 }

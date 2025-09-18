@@ -1,7 +1,7 @@
 import { WeatherData, WeatherForecast, Location } from '../types';
 
 export class WeatherService {
-  private apiKey = '78cb9a087a2f45c0809153126251709'; // WeatherAPI.com API key
+  private apiKey = (import.meta as any)?.env?.VITE_OPENWEATHER_API_KEY || 'your-openweather-api-key';
   private baseUrl = 'https://api.weatherapi.com/v1';
 
   /**
