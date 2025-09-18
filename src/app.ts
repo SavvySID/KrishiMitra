@@ -1320,11 +1320,4 @@ export class KrishiMitraApp {
     }
   }
 
-  private getUniqueCrops(): string[] {
-    const set = new Set<string>();
-    (this.state.marketPrices || []).forEach(p => {
-      if (p.cropName) set.add(p.cropName);
-    });
-    return Array.from(set).sort();
-  }
 }

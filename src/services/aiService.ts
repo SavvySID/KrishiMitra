@@ -75,6 +75,27 @@ export class AIService {
           }
         }
         throw lastErr || new Error('Groq request failed');
+      } else {
+        // Fallback to Gemini if Groq is not available
+        const geminiKey = (import.meta as any)?.env?.VITE_GEMINI_API_KEY;
+        if (!geminiKey) {
+          throw new Error('No AI API key configured');
+        }
+        
+        const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+        const geminiResp = await fetch(`${geminiUrl}?key=${geminiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        
+        if (!geminiResp.ok) {
+          throw new Error(`Gemini API error: ${geminiResp.status}`);
+        }
+        
+        const geminiData = await geminiResp.json();
+        const text = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        return text || 'No advice available.';
       }
     };
 

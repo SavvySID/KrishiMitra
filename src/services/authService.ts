@@ -14,7 +14,7 @@ export interface RegisterData {
   location: Location;
   farmSize: number;
   experience: number;
-  language: 'en' | 'hi' | 'regional';
+  language: 'en' | 'hi' | 'pa' | 'regional';
 }
 
 export interface AuthResponse {
@@ -42,10 +42,10 @@ export class AuthService {
       // Validate input data
       const validation = this.validateRegistrationData(data);
       if (!validation.isValid) {
-        return {
-          success: false,
-          message: validation.message
-        };
+      return Promise.resolve({
+        success: false,
+        message: validation.message
+      });
       }
 
       // Check if farmer already exists
@@ -53,10 +53,10 @@ export class AuthService {
       const existingFarmer = existingFarmers.find(f => f.email === data.email);
       
       if (existingFarmer) {
-        return {
+        return Promise.resolve({
           success: false,
           message: 'A farmer with this email already exists'
-        };
+        });
       }
 
       // Create new farmer
@@ -79,16 +79,16 @@ export class AuthService {
       // Auto-login after registration
       this.setCurrentUser(newFarmer);
 
-      return {
+      return Promise.resolve({
         success: true,
         message: 'Registration successful! Welcome to KrishiMitra.',
         farmer: newFarmer
-      };
+      });
     } catch (error) {
-      return {
+      return Promise.resolve({
         success: false,
         message: 'Registration failed. Please try again.'
-      };
+      });
     }
   }
 
@@ -98,26 +98,26 @@ export class AuthService {
       const farmer = farmers.find(f => f.email === credentials.email);
 
       if (!farmer) {
-        return {
+        return Promise.resolve({
           success: false,
           message: 'No farmer found with this email address'
-        };
+        });
       }
 
       // In a real app, you would verify the password hash here
       // For demo purposes, we'll accept any password
       this.setCurrentUser(farmer);
 
-      return {
+      return Promise.resolve({
         success: true,
         message: 'Login successful!',
         farmer: farmer
-      };
+      });
     } catch (error) {
-      return {
+      return Promise.resolve({
         success: false,
         message: 'Login failed. Please try again.'
-      };
+      });
     }
   }
 
