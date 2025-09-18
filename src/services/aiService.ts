@@ -21,7 +21,7 @@ export class AIService {
     const useGroq = Boolean(this.groqKey);
     console.log(useGroq)
     const doCall = async (): Promise<string> => {
-      if (useGroq) {
+  if (useGroq) {
         // Groq OpenAI-compatible Chat Completions
         const groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
@@ -75,6 +75,9 @@ export class AIService {
           }
         }
         throw lastErr || new Error('Groq request failed');
+      } else {
+        // Fallback: return a default message or handle other providers here
+        return 'AI service is not configured.';
       }
     };
 
