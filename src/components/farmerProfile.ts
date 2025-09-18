@@ -422,7 +422,7 @@ export class FarmerProfile {
     try {
       const response = await this.authService.updateFarmerProfile(updatedFarmer);
       
-      if (response.success && response.farmer) {
+  if (response.farmer) {
         this.showMessage('Profile updated successfully!', 'success');
         setTimeout(() => {
           this.hide();
@@ -458,7 +458,7 @@ export class FarmerProfile {
       if (doubleConfirmed) {
         try {
           const response = await this.authService.deleteFarmer(farmer.id);
-          if (response.success) {
+          if (response.message && response.message.toLowerCase().includes('deleted')) {
             alert('Your account has been deleted successfully.');
             this.hide();
             this.onProfileUpdate(null as any); // Trigger logout in parent
