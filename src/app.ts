@@ -1,4 +1,4 @@
-import { AppState, Farmer, Location, SoilData, Language } from './types';
+import { AppState, Farmer, Location, SoilData, Language, DetectionRecord } from './types';
 import { CropRecommendationService } from './services/cropRecommendationService';
 import { WeatherService } from './services/weatherService';
 import { AuthService } from './services/authService';
@@ -6,15 +6,20 @@ import { AuthModal } from './components/authModal';
 import { FarmerProfile } from './components/farmerProfile';
 import { mockMarketPrices, mockFinancialSchemes, languages } from './data/mockData';
 import { i18n } from './services/i18nService';
+import { PestDetectionService } from './services/pestDetectionService';
+import { MarketService } from './services/marketService';
 
 export class KrishiMitraApp {
   private state: AppState;
   private cropService: CropRecommendationService;
   private weatherService: WeatherService;
   private authService: AuthService;
+  private pestDetection: PestDetectionService;
+  private marketService: MarketService;
   private authModal: AuthModal | null = null;
   private farmerProfile: FarmerProfile | null = null;
   private currentView: string = 'dashboard';
+  private selectedCropFilter: string = 'all';
 
   constructor() {
     this.state = {
@@ -28,19 +33,21 @@ export class KrishiMitraApp {
       agriculturalTasks: [],
       diseases: [],
       pests: [],
-      financialSchemes: mockFinancialSchemes
+      financialSchemes: mockFinancialSchemes,
+      detectionHistory: []
     };
 
     this.cropService = new CropRecommendationService();
     this.weatherService = new WeatherService();
     this.authService = new AuthService();
-    
+    this.pestDetection = new PestDetectionService();
+    this.marketService = new MarketService();
+
     // Initialize auth modal and farmer profile
     this.authModal = new AuthModal(
       (farmer: Farmer) => this.handleAuthSuccess(farmer),
       () => this.handleAuthCancel()
     );
-    
     this.farmerProfile = new FarmerProfile(
       (farmer: Farmer | null) => this.handleProfileUpdate(farmer)
     );
@@ -58,6 +65,9 @@ export class KrishiMitraApp {
     if (existingUser) {
       this.state.currentUser = existingUser;
     }
+
+    // Load detection history
+    this.state.detectionHistory = this.pestDetection.getHistory(existingUser?.id);
     
     this.render();
     this.setupEventListeners();
@@ -101,6 +111,15 @@ export class KrishiMitraApp {
         'kharif'
       );
     }
+
+    // Fetch live market prices on init (Punjab + optional crop)
+    try {
+      const cropFilter = this.selectedCropFilter === 'all' ? undefined : this.selectedCropFilter;
+      const live = await this.marketService.fetchLivePrices(200, 'Punjab', cropFilter);
+      if (Array.isArray(live) && live.length) {
+        this.state.marketPrices = live;
+      }
+    } catch {}
 
     this.render();
   }
@@ -301,44 +320,30 @@ export class KrishiMitraApp {
     return `
       <main class="main-content">
         <div class="crop-advisory-container">
-          <h2>Crop Recommendation Engine</h2>
-          <div class="crop-filters">
-            <select id="seasonFilter" class="filter-select">
-              <option value="kharif">Kharif Season</option>
-              <option value="rabi">Rabi Season</option>
-              <option value="zaid">Zaid Season</option>
-            </select>
-            <button class="refresh-btn" id="refreshRecommendations">
-              <i class="fas fa-sync-alt"></i> Refresh
-            </button>
-          </div>
-          
-          <div class="recommendations-grid">
-            ${this.state.cropRecommendations.map(rec => `
-              <div class="recommendation-card">
-                <div class="crop-header">
-                  <h3>${rec.crop.name}</h3>
-                  <span class="score-badge">${Math.round(rec.score * 100)}%</span>
-                </div>
-                <div class="crop-details">
-                  <p><strong>Season:</strong> ${rec.crop.season}</p>
-                  <p><strong>Duration:</strong> ${rec.crop.duration} days</p>
-                  <p><strong>Water Need:</strong> ${rec.crop.waterRequirement}</p>
-                  <p><strong>Expected Yield:</strong> ${rec.expectedYield} kg/acre</p>
-                  <p><strong>Estimated Profit:</strong> ₹${rec.estimatedProfit.toLocaleString()}</p>
-                </div>
-                <div class="reasons">
-                  <h4>Why this crop?</h4>
-                  <ul>
-                    ${rec.reasons.map(reason => `<li>${reason}</li>`).join('')}
-                  </ul>
-                </div>
-                <div class="timeline">
-                  <p><strong>Sowing:</strong> ${rec.sowingDate.toLocaleDateString()}</p>
-                  <p><strong>Harvesting:</strong> ${rec.harvestingDate.toLocaleDateString()}</p>
-                </div>
+          <h2>${i18n.translate('crops.title')}</h2>
+
+          <div class="assistant-section">
+            <div class="assistant-inputs">
+              <div class="ai-text-input">
+                <input id="assistantPrompt" class="ai-input" type="text" placeholder="Type your question (English/Hindi/Punjabi)" />
+                <button class="ask-ai-btn" id="assistantAskBtn">Ask</button>
+                <button class="voice-btn" id="assistantVoiceBtn">
+                  <i class="fas fa-microphone"></i>
+                </button>
               </div>
-            `).join('')}
+              <div id="assistantStatus" class="voice-status"></div>
+            </div>
+            <div class="assistant-examples">
+              <div class="examples-title">Try asking:</div>
+              <div class="examples-chips">
+                <button class="example-chip" data-prompt="Which crop should I grow this Kharif season in Punjab for best profit?">Kharif crop for best profit in Punjab</button>
+                <button class="example-chip" data-prompt="Give irrigation schedule and fertilizer plan for wheat in loamy soil.">Irrigation + fertilizer plan for wheat</button>
+                <button class="example-chip" data-prompt="My rice leaves have brown spots. What should I do now?">Treat brown spots on rice leaves</button>
+                <button class="example-chip" data-prompt="Suggest low water crops for sandy soil in winter in Haryana.">Low-water crops for sandy soil (winter)</button>
+                <button class="example-chip" data-prompt="High market demand crops for next month in Delhi region.">High demand crops next month</button>
+              </div>
+            </div>
+            <div id="assistantOutput" class="ai-advisory"></div>
           </div>
         </div>
       </main>
@@ -489,21 +494,29 @@ export class KrishiMitraApp {
   }
 
   private renderMarketPrices(): string {
+    const alerts = this.marketService.getPriceAlerts(this.state.marketPrices);
+    const crops = this.getUniqueCrops();
     return `
       <main class="main-content">
         <div class="market-prices-container">
           <h2>Market Intelligence</h2>
           <div class="market-filters">
-            <select id="locationFilter" class="filter-select">
-              <option value="all">All Locations</option>
-              <option value="delhi">Delhi</option>
-              <option value="punjab">Punjab</option>
-              <option value="gujarat">Gujarat</option>
+            <select id="cropFilter" class="filter-select">
+              <option value="all" ${this.selectedCropFilter === 'all' ? 'selected' : ''}>All Crops</option>
+              ${crops.map(c => `<option value="${c}" ${this.selectedCropFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
             </select>
             <button class="refresh-btn" id="refreshPrices">
               <i class="fas fa-sync-alt"></i> Refresh Prices
             </button>
           </div>
+          
+          ${alerts && alerts.length ? `
+          <div class="price-alerts">
+            <h3>Price Alerts</h3>
+            <ul class="alerts-list">
+              ${alerts.map((a: string) => `<li class="alert-item">${a}</li>`).join('')}
+            </ul>
+          </div>` : ''}
           
           <div class="prices-grid">
             ${this.state.marketPrices.map(price => `
@@ -631,6 +644,7 @@ export class KrishiMitraApp {
                 <button class="upload-btn">Choose Image</button>
               </div>
             </div>
+            <div class="detection-result" id="detectionResult"></div>
           </div>
           
           <div class="diseases-section">
@@ -664,6 +678,13 @@ export class KrishiMitraApp {
                 <p><strong>Damage:</strong> Holes in bolls, reduced fiber quality</p>
                 <p><strong>Control:</strong> Bt cotton, Spinosad, natural predators</p>
               </div>
+            </div>
+          </div>
+
+          <div class="history-section">
+            <h3>Recent Detections</h3>
+            <div class="history-list" id="detectionHistory">
+              ${this.renderDetectionHistory()}
             </div>
           </div>
         </div>
@@ -791,13 +812,45 @@ export class KrishiMitraApp {
       });
     }
 
-    // Voice button
-    const voiceBtn = document.getElementById('voiceBtn');
-    if (voiceBtn) {
-      voiceBtn.addEventListener('click', () => {
-        this.handleVoiceInput();
+    // Voice advisory button (in Crop Advisory)
+    const assistantVoiceBtn = document.getElementById('assistantVoiceBtn');
+    if (assistantVoiceBtn) {
+      assistantVoiceBtn.addEventListener('click', () => {
+        this.handleAssistantVoice();
       });
     }
+
+    // Assistant Ask via text
+    const assistantAsk = document.getElementById('assistantAskBtn');
+    const assistantPrompt = document.getElementById('assistantPrompt') as HTMLInputElement;
+    if (assistantAsk && assistantPrompt) {
+      assistantAsk.addEventListener('click', async () => {
+        const query = (assistantPrompt.value || '').trim();
+        const outputEl = document.getElementById('assistantOutput');
+        if (!query) return;
+        await this.requestAssistantAdvice(query);
+      });
+    }
+
+    // Assistant details submit
+    const submitDetails = document.getElementById('assistantSubmitDetails');
+    if (submitDetails) {
+      submitDetails.addEventListener('click', async () => {
+        const assistantPrompt = (document.getElementById('assistantPrompt') as HTMLInputElement)?.value || '';
+        await this.requestAssistantAdvice(assistantPrompt);
+      });
+    }
+
+    // Example chips -> fill and ask
+    document.querySelectorAll('.example-chip').forEach(el => {
+      el.addEventListener('click', async () => {
+        const prompt = (el as HTMLElement).getAttribute('data-prompt') || '';
+        const input = document.getElementById('assistantPrompt') as HTMLInputElement | null;
+        if (input) input.value = prompt;
+        await this.requestAssistantAdvice(prompt);
+      });
+    });
+
 
     // User button and dropdown
     const userBtn = document.getElementById('userBtn');
@@ -858,6 +911,41 @@ export class KrishiMitraApp {
         this.handleImageUpload(e);
       });
     }
+
+    // Refresh prices
+    const refreshBtn = document.getElementById('refreshPrices');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', async () => {
+        try {
+          const cropFilter = this.selectedCropFilter === 'all' ? undefined : this.selectedCropFilter;
+          const live = await this.marketService.fetchLivePrices(200, 'Punjab', cropFilter);
+          if (Array.isArray(live) && live.length) {
+            this.state.marketPrices = live;
+          }
+        } catch {}
+        this.render();
+      });
+    }
+
+    // Crop filter change
+    const cropFilterEl = document.getElementById('cropFilter') as HTMLSelectElement;
+    if (cropFilterEl) {
+      cropFilterEl.addEventListener('change', async (e) => {
+        this.selectedCropFilter = (e.target as HTMLSelectElement).value;
+        try {
+          const cropFilter = this.selectedCropFilter === 'all' ? undefined : this.selectedCropFilter;
+          const live = await this.marketService.fetchLivePrices(200, 'Punjab', cropFilter);
+          if (Array.isArray(live) && live.length) {
+            this.state.marketPrices = live;
+          } else {
+            this.state.marketPrices = [] as any;
+          }
+        } catch {
+          // leave existing prices if API fails
+        }
+        this.render();
+      });
+    }
   }
 
   private handleVoiceInput(): void {
@@ -877,6 +965,81 @@ export class KrishiMitraApp {
     }
   }
 
+  private async requestAssistantAdvice(userQuery: string): Promise<void> {
+    const outputEl = document.getElementById('assistantOutput');
+    if (outputEl) outputEl.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Getting advisory...</div>';
+
+    const lang = this.state.selectedLanguage.code as any;
+    const location = this.state.currentLocation;
+    const context: any = {
+      state: location?.state,
+      district: location?.district,
+      temperatureC: this.state.weatherData?.temperature,
+      rainfallMm: this.state.weatherData?.rainfall,
+      ph: this.state.soilData?.ph,
+      organicMatter: this.state.soilData?.organicMatter
+    };
+
+    const prompt = `${userQuery}\n\nContext (JSON): ${JSON.stringify(context)}`;
+
+    try {
+      const { AIService } = await import('./services/aiService');
+      const ai = new AIService();
+      const advice = await ai.getCropAdvisory(prompt, lang);
+      if (outputEl) outputEl.innerHTML = `<div class="advice-card">${advice.replace(/\n/g, '<br>')}</div>`;
+    } catch (e) {
+      const keyMissing = !(import.meta as any)?.env?.VITE_GEMINI_API_KEY && !(import.meta as any)?.env?.vite_gemini_api_key;
+      if (outputEl) {
+        const groqPresent = Boolean((import.meta as any)?.env?.VITE_GROQ_API_KEY || (import.meta as any)?.env?.vite_groq_api_key);
+        const geminiPresent = Boolean((import.meta as any)?.env?.VITE_GEMINI_API_KEY || (import.meta as any)?.env?.vite_gemini_api_key);
+        const missingMsg = !groqPresent && !geminiPresent
+          ? 'Missing AI API key. Add VITE_GROQ_API_KEY or VITE_GEMINI_API_KEY in your .env and restart.'
+          : 'Could not generate advice. Please try again.';
+        outputEl.innerHTML = `<div class="error"><i class="fas fa-exclamation-circle"></i> ${missingMsg}</div>`;
+      }
+    }
+  }
+
+  private async handleAssistantVoice(): Promise<void> {
+    const statusEl = document.getElementById('assistantStatus');
+    const sr = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!sr) {
+      if (statusEl) statusEl.textContent = 'Voice recognition not supported in this browser';
+      return;
+    }
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      if (statusEl) statusEl.textContent = 'Voice requires HTTPS or localhost.';
+      return;
+    }
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      if (statusEl) statusEl.textContent = 'Microphone permission denied';
+      return;
+    }
+    const recognition = new sr();
+    const langCode = this.state.selectedLanguage.code;
+    recognition.lang = langCode === 'hi' ? 'hi-IN' : langCode === 'pa' ? 'pa-IN' : 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    if (statusEl) statusEl.textContent = 'Listening...';
+    try { recognition.start(); } catch {}
+
+    recognition.onresult = async (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      (document.getElementById('assistantPrompt') as HTMLInputElement).value = transcript;
+      if (statusEl) statusEl.textContent = `Heard: ${transcript}`;
+      await this.requestAssistantAdvice(transcript);
+    };
+    recognition.onerror = (e: any) => {
+      const code = e?.error || 'unknown';
+      if (statusEl) statusEl.textContent = code === 'not-allowed' ? 'Microphone permission denied' : 'Voice error: ' + code;
+    };
+    recognition.onend = () => {
+      if (statusEl) statusEl.textContent = '';
+    };
+  }
+
   private processVoiceCommand(command: string): void {
     const lowerCommand = command.toLowerCase();
     
@@ -891,6 +1054,59 @@ export class KrishiMitraApp {
     }
     
     this.render();
+  }
+
+  private async handleVoiceAdvisory(): Promise<void> {
+    const statusEl = document.getElementById('voiceStatus');
+    const outputEl = document.getElementById('aiAdvisory');
+    const langCode = this.state.selectedLanguage.code;
+    const sr = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!sr) {
+      if (statusEl) statusEl.textContent = 'Voice recognition not supported in this browser';
+      return;
+    }
+    // Secure context and permission preflight
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      if (statusEl) statusEl.textContent = 'Voice requires HTTPS or localhost.';
+      return;
+    }
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      if (statusEl) statusEl.textContent = 'Microphone permission denied';
+      return;
+    }
+    const recognition = new sr();
+    recognition.lang = langCode === 'hi' ? 'hi-IN' : langCode === 'pa' ? 'pa-IN' : 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    if (statusEl) statusEl.textContent = 'Listening...';
+    try {
+      recognition.start();
+    } catch {}
+
+    recognition.onresult = async (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      if (statusEl) statusEl.textContent = `Heard: ${transcript}`;
+      if (outputEl) outputEl.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Getting advisory...</div>';
+      try {
+        const { AIService } = await import('./services/aiService');
+        const ai = new AIService();
+        const advice = await ai.getCropAdvisory(transcript, langCode as any);
+        if (outputEl) outputEl.innerHTML = `<div class="advice-card">${advice.replace(/\n/g, '<br>')}</div>`;
+      } catch (e) {
+        if (outputEl) outputEl.textContent = 'Failed to get advisory. Please try again.';
+      }
+    };
+
+    recognition.onerror = (e: any) => {
+      const code = e?.error || 'unknown';
+      if (statusEl) statusEl.textContent = code === 'not-allowed' ? 'Microphone permission denied' : 'Voice error: ' + code;
+    };
+
+    recognition.onend = () => {
+      if (statusEl) statusEl.textContent = '';
+    };
   }
 
   private handleAuthSuccess(farmer: Farmer): void {
@@ -921,14 +1137,78 @@ export class KrishiMitraApp {
     this.render();
   }
 
-  private handleImageUpload(event: Event): void {
+  private async handleImageUpload(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     
     if (file) {
-      // In a real implementation, you would send this to an AI service for analysis
-      alert('Image uploaded! Disease/pest detection would be performed here using AI.');
+      const detectContainer = document.getElementById('detectionResult');
+      if (detectContainer) {
+        detectContainer.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Analyzing image...</div>';
+      }
+
+      try {
+        const record = await this.pestDetection.detectFromFile(file, this.state.currentUser?.id || undefined);
+        // Update state and history UI
+        this.state.detectionHistory = [record, ...(this.state.detectionHistory || [])].slice(0, 100);
+        const historyEl = document.getElementById('detectionHistory');
+        if (historyEl) {
+          historyEl.innerHTML = this.renderDetectionHistory();
+        }
+
+        if (detectContainer) {
+          detectContainer.innerHTML = this.renderDetectionResult(record);
+        }
+      } catch (err) {
+        if (detectContainer) {
+          detectContainer.innerHTML = '<div class="error"><i class="fas fa-exclamation-circle"></i> Detection failed. Please try another image.</div>';
+        }
+      } finally {
+        // Reset input so same file can be uploaded again
+        input.value = '';
+      }
     }
+  }
+
+  private renderDetectionResult(record: DetectionRecord): string {
+    const r = record.result;
+    const conf = Math.round(r.confidence * 100);
+    const prevention = r.pestInfo?.prevention?.map(p => `<li>${p}</li>`).join('') || '';
+    const treatment = r.pestInfo?.treatment?.map(t => `<li>${t}</li>`).join('') || '';
+    return `
+      <div class="result-card">
+        <div class="result-header">
+          <h4>${r.displayName}</h4>
+          <span class="badge">${r.category}</span>
+          <span class="confidence">Confidence: ${conf}%</span>
+        </div>
+        <div class="result-body">
+          <div class="result-image"><img src="${record.imageUrl}" alt="Detection image"/></div>
+          <div class="result-info">
+            ${r.pestInfo?.scientificName ? `<p><strong>Scientific:</strong> ${r.pestInfo.scientificName}</p>` : ''}
+            ${r.pestInfo?.overview ? `<p>${r.pestInfo.overview}</p>` : ''}
+            ${prevention ? `<h5>Prevention</h5><ul>${prevention}</ul>` : ''}
+            ${treatment ? `<h5>Treatment</h5><ul>${treatment}</ul>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  private renderDetectionHistory(): string {
+    const history = this.state.detectionHistory || [];
+    if (history.length === 0) {
+      return '<p>No detections yet. Upload an image to get started.</p>';
+    }
+    return history.slice(0, 6).map(rec => `
+      <div class="history-item">
+        <div class="thumb"><img src="${rec.imageUrl}" alt="thumb"/></div>
+        <div class="meta">
+          <div class="title">${rec.result.displayName}</div>
+          <div class="sub">${new Date(rec.createdAt).toLocaleString()} • ${Math.round(rec.result.confidence * 100)}%</div>
+        </div>
+      </div>
+    `).join('');
   }
 
   private getWeatherIcon(condition: string): string {
@@ -952,5 +1232,13 @@ export class KrishiMitraApp {
       default:
         return 'neutral';
     }
+  }
+
+  private getUniqueCrops(): string[] {
+    const set = new Set<string>();
+    (this.state.marketPrices || []).forEach(p => {
+      if (p.cropName) set.add(p.cropName);
+    });
+    return Array.from(set).sort();
   }
 }

@@ -1,7 +1,7 @@
 import { WeatherData, WeatherForecast, Location } from '../types';
 
 export class WeatherService {
-  private apiKey = 'your-openweather-api-key'; // Replace with actual API key
+  private apiKey = (import.meta as any)?.env?.VITE_OPENWEATHER_API_KEY || 'your-openweather-api-key';
 
   /**
    * Get current weather data for a location
