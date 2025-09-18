@@ -11,6 +11,13 @@ import { PestDetectionService } from './services/pestDetectionService';
 import { MarketService } from './services/marketService';
 
 export class KrishiMitraApp {
+  private getUniqueCrops(): string[] {
+    const set = new Set<string>();
+    (this.state.marketPrices || []).forEach(p => {
+      if (p.cropName) set.add(p.cropName);
+    });
+    return Array.from(set).sort();
+  }
   private state: AppState;
   private cropService: CropRecommendationService;
   private weatherService: WeatherService;
@@ -581,7 +588,7 @@ export class KrishiMitraApp {
             </select>
             <select id="cropFilter" class="filter-select">
               <option value="all" ${this.selectedCropFilter === 'all' ? 'selected' : ''}>All Crops</option>
-              ${crops.map(c => `<option value="${c}" ${this.selectedCropFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
+              ${crops.map((c: string) => `<option value="${c}" ${this.selectedCropFilter === c ? 'selected' : ''}>${c}</option>`).join('')}
             </select>
             <button class="refresh-btn" id="refreshPrices">
               <i class="fas fa-sync-alt"></i> Refresh Prices
@@ -1305,11 +1312,4 @@ export class KrishiMitraApp {
     }
   }
 
-  private getUniqueCrops(): string[] {
-    const set = new Set<string>();
-    (this.state.marketPrices || []).forEach(p => {
-      if (p.cropName) set.add(p.cropName);
-    });
-    return Array.from(set).sort();
-  }
 }
